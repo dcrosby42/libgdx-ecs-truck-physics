@@ -34,6 +34,10 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration
 
 import com.badlogic.gdx.physics.box2d.joints.PrismaticJointDef  
 import com.badlogic.gdx.physics.box2d.joints.RevoluteJointDef  
+import com.badlogic.gdx.physics.box2d.joints.WheelJointDef  
+
+
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 
 $game_width = 1024
 $game_height = 720
@@ -62,6 +66,10 @@ class MyGame < Game
 # 
 end
 
+def debug_exception(e)
+  puts "EXCEPTION: #{e.message}\n\t#{e.backtrace.join("\n\t")}"
+end
+
 def reload_ball
   puts "Reload Ball!"
   $app.post_runnable do
@@ -70,7 +78,8 @@ def reload_ball
       $screen = Ball.new
       $game.set_screen $screen
     rescue Exception => e
-      puts "RELOAD FAIL: #{e.message}\n\t#{e.backtrace.join("\n\t")}"
+      debug_exception e
+      # puts "RELOAD FAIL: #{e.message}\n\t#{e.backtrace.join("\n\t")}"
     end
   end
 end
@@ -83,7 +92,8 @@ def reload_car
       $screen = Car.new
       $game.set_screen $screen
     rescue Exception => e
-      puts "RELOAD FAIL: #{e.message}\n\t#{e.backtrace.join("\n\t")}"
+      debug_exception e
+      # puts "RELOAD FAIL: #{e.message}\n\t#{e.backtrace.join("\n\t")}"
     end
   end
 end
