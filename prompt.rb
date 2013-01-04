@@ -39,6 +39,10 @@ import com.badlogic.gdx.physics.box2d.joints.WheelJointDef
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 
+import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.BitmapFont
+
 $game_width = 1024
 $game_height = 720
 

@@ -8,6 +8,9 @@ class Car
   def vec2(x,y)
     Vector2.new(x,y)
   end
+  def rad2deg(r)
+    r * 180 / Math::PI 
+  end
 
   def show
     return if @broke
@@ -27,10 +30,13 @@ class Car
     @debug_renderer.draw_bodies = true
     @debug_renderer.draw_inactive_bodies = true
 
+    @do_debug_render = true
+
     # CAMERA
     @camera = OrthographicCamera.new
-    @camera.viewportWidth = $game_width * 1.0 / 25
-    @camera.viewportHeight = $game_height * 1.0 / 25
+    @zoom_factor = 35
+    # @camera.viewportWidth = $game_width * 1.0 / 35
+    # @camera.viewportHeight = $game_height * 1.0 / 35
     # @camera.viewportWidth = $game_width
     # @camera.viewportHeight = $game_height
     @look_at = vec2(@camera.viewportWidth * 0.5, @camera.viewportHeight * 0.5)
@@ -153,8 +159,13 @@ class Car
     jd.initialize__method(@cart, @wheel2, @wheel2.world_center, vec2(0,1.0))
     @motor2 = @world.create_joint(jd)
 
+    @sprite_batch = SpriteBatch.new
+    @color2x2 = Texture.new(Gdx.files.internal('images/color2x2.png'))
+    @chassis = Texture.new(Gdx.files.internal('images/truck_chassis.png'))
+    @tire = Texture.new(Gdx.files.internal('images/truck_tire.png'))
 
     @shape_renderer = ShapeRenderer.new
+
 
   rescue Exception => e
     debug_exception e
@@ -177,13 +188,15 @@ class Car
     return if @broke
 
     Gdx.gl.glClear(GL10::GL_COLOR_BUFFER_BIT);  
-    @debug_renderer.render(@world, @camera.combined);  
+    @debug_renderer.render(@world, @camera.combined) if @do_debug_render
     @world.step(@BOX_STEP, @BOX_VELOCITY_ITERATIONS, @BOX_POSITION_ITERATIONS);  
 
     power = 0
     if Gdx.input.isKeyPressed(Input::Keys::LEFT)
+      @manual_camera = false
       power = 100
     elsif Gdx.input.isKeyPressed(Input::Keys::RIGHT)
+      @manual_camera = false
       power = -100
     end
 
@@ -212,15 +225,129 @@ class Car
     # @shape_renderer.line(0,0, 20,20);
     # @shape_renderer.end
 
+    if Gdx.input.isKeyPressed(Input::Keys::W)
+      @zoom_factor += 1
+      @zoom_factor = 1 if @zoom_factor < 1
+    end
+    if Gdx.input.isKeyPressed(Input::Keys::S)
+      @zoom_factor -= 1
+    end
+
+    @camera.viewportWidth = $game_width * 1.0 / @zoom_factor
+    @camera.viewportHeight = $game_height * 1.0 / @zoom_factor
+    
     # Keyboard control of camera:
-    # @look_at.x -= 0.1 if Gdx.input.isKeyPressed(Input::Keys::A)
-    # @look_at.x += 0.1 if Gdx.input.isKeyPressed(Input::Keys::D)
+    if Gdx.input.isKeyPressed(Input::Keys::A)
+      @look_at.x -= 0.2
+      @manual_camera = true
+    end
+    if Gdx.input.isKeyPressed(Input::Keys::D)
+      @look_at.x += 0.2 
+      @manual_camera = true
+    end
 
-    @look_at.x = @cart.position.x
-    @look_at.y = @cart.position.y + 7
-
-
+    # Camera follows vehicle
+    unless @manual_camera
+      @look_at.x = @cart.position.x
+      @look_at.y = @cart.position.y + 7
+    end
     update_camera
+
+    # Images
+    @sprite_batch.setProjectionMatrix(@camera.combined)
+    @sprite_batch.begin
+
+
+      # batch.draw(
+      #   render_comp.image,                          # Texture
+      #   loc_comp.x, loc_comp.y,                     # x, y
+      #   render_comp.width/2, render_comp.height/2,  # originX, originY
+      #   render_comp.width, render_comp.height,      # width, height
+      #   1.0, 1.0,                                   # scaleX, scaleY
+      #   render_comp.rotation,                       # rotation
+      #   0, 0,                                       # srcX, srcY
+      #   render_comp.width, render_comp.height,      # srcWidth, srcHeight
+      #   false, false                                # flipX, flipY
+      # )
+
+    if false
+      @sprite_batch.draw(
+        @color2x2, 
+        @cart.position.x - 1, @cart.position.y,
+        1,0, #@color2x2.width/2.0, @color2x2.height/2.0,
+        @color2x2.width, @color2x2.height,
+        1.0, 1.0,
+        rad2deg(@cart.getAngle),
+        0,0,
+        @color2x2.width, @color2x2.height,
+        false,false
+      )
+    end
+
+
+    if true
+      scale = 0.022
+      tsw = @tire.width * scale
+      tsh = @tire.height * scale
+      @sprite_batch.draw(
+        @tire, 
+        @wheel1.position.x - (tsw/2), @wheel1.position.y - (tsh/2), 
+        (tsw/2), (tsh/2),
+        @tire.width*scale, @tire.height*scale,
+        1.0, 1.0,
+        rad2deg(@wheel1.getAngle),
+        0,0,
+        @tire.width, @tire.height,
+        false,false
+      )
+      @sprite_batch.draw(
+        @tire, 
+        @wheel2.position.x - (tsw/2), @wheel2.position.y - (tsh/2), 
+        (tsw/2), (tsh/2),
+        @tire.width*scale, @tire.height*scale,
+        1.0, 1.0,
+        rad2deg(@wheel2.getAngle),
+        0,0,
+        @tire.width, @tire.height,
+        false,false
+      )
+    end
+
+    if true
+      scale = 0.022
+      # csw = @chassis.width * scale
+      # csh = @chassis.height * scale
+      @sprite_batch.draw(
+        @chassis, 
+        @cart.position.x-3.3, @cart.position.y, 
+        3.3, 0,
+        @chassis.width*scale, @chassis.height*scale,
+        1.0, 1.0,
+        rad2deg(@cart.getAngle),
+        0,0,
+        @chassis.width, @chassis.height,
+        false,false
+      )
+    end
+
+    if false
+      scale = 0.022
+      # csw = @chassis.width * scale
+      # csh = @chassis.height * scale
+      @sprite_batch.draw(
+        @chassis, 
+        @cart.position.x, @cart.position.y,
+        @chassis.width*scale, @chassis.height*scale
+      )
+      #   scale,scale,
+      #   rad2deg(@cart.getAngle),
+      #   0,0,
+      #   @chassis.width, @chassis.height,
+      #   false,false
+      # )
+    end
+
+    @sprite_batch.end
 
   rescue Exception => e
     debug_exception e
