@@ -3,6 +3,8 @@
 $:.push "./lib"
 $:.push "./lib/ruby"
 
+require 'pry'
+
 # Need a different root when inside the jar, luckily $0 is "<script>" in that case
 RELATIVE_ROOT = $0['<'] ? 'ecs_game/' : ''
 
@@ -19,7 +21,6 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.math.Vector2  
 import com.badlogic.gdx.physics.box2d.Body  
 import com.badlogic.gdx.physics.box2d.BodyDef  
-# import com.badlogic.gdx.physics.box2d.BodyDef.BodyType  
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer  
 import com.badlogic.gdx.physics.box2d.CircleShape  
 import com.badlogic.gdx.physics.box2d.Fixture  
@@ -39,13 +40,14 @@ $game_height = 720
 class PhysicsDemo
   include ApplicationListener
 
-  BOX_STEP = 1.0/60  
-  BOX_VELOCITY_ITERATIONS = 6  
-  BOX_POSITION_ITERATIONS = 2  
-  WORLD_TO_BOX = 0.01
-  BOX_WORLD_TO = 100  
 
   def create
+    @BOX_STEP = 1.0/60  
+    @BOX_VELOCITY_ITERATIONS = 6  
+    @BOX_POSITION_ITERATIONS = 2  
+    @WORLD_TO_BOX = 0.01
+    @BOX_WORLD_TO = 100  
+
     @world = World.new(Vector2.new(0,-100), true)
     @debug_renderer = Box2DDebugRenderer.new
     @camera = OrthographicCamera.new
@@ -55,36 +57,41 @@ class PhysicsDemo
     @camera.update
 
     #Ground body  
-    groundBodyDef = BodyDef.new
-    groundBodyDef.position.set(Vector2.new(0, 10))  
-    groundBody = @world.createBody(groundBodyDef)  
-    groundBox = PolygonShape.new
-    groundBox.setAsBox((@camera.viewportWidth) * 2, 10.0)  
-    groundBody.createFixture(groundBox, 0.0)  
+    @groundBodyDef = BodyDef.new
+    @groundBodyDef.position.set(Vector2.new(0, 10))  
+    @groundBody = @world.createBody(@groundBodyDef)  
+    @groundBox = PolygonShape.new
+    @groundBox.setAsBox((@camera.viewportWidth) * 2, 10.0)  
+    @groundBody.createFixture(@groundBox, 0.0)  
 
     #Dynamic Body  
-    bodyDef = BodyDef.new
-    bodyDef.type = BodyDef::BodyType::DynamicBody  
-    bodyDef.position.set(@camera.viewportWidth / 2, @camera.viewportHeight / 2)  
-    body = @world.createBody(bodyDef)  
-    dynamicCircle = CircleShape.new
-    dynamicCircle.setRadius(20)  
-    fixtureDef = FixtureDef.new
-    fixtureDef.shape = dynamicCircle  
-    fixtureDef.density = 1.0
-    fixtureDef.friction = 0.0  
-    fixtureDef.restitution =0.5 
-    body.createFixture(fixtureDef)  
+    @bodyDef = BodyDef.new
+    @bodyDef.type = BodyDef::BodyType::DynamicBody  
+    @bodyDef.position.set(@camera.viewportWidth / 2, @camera.viewportHeight / 2)  
+    @body = @world.createBody(@bodyDef)  
+    @dynamicCircle = CircleShape.new
+    @dynamicCircle.setRadius(20)  
+    @fixtureDef = FixtureDef.new
+    @fixtureDef.shape = @dynamicCircle  
+    @fixtureDef.density = 1.0
+    @fixtureDef.friction = 0.0  
+    @fixtureDef.restitution =0.5 
+    @body.createFixture(@fixtureDef)  
   end
 
   def dispose
   end
 
   def render
-    
     Gdx.gl.glClear(GL10::GL_COLOR_BUFFER_BIT);  
     @debug_renderer.render(@world, @camera.combined);  
-    @world.step(BOX_STEP, BOX_VELOCITY_ITERATIONS, BOX_POSITION_ITERATIONS);  
+    @world.step(@BOX_STEP, @BOX_VELOCITY_ITERATIONS, @BOX_POSITION_ITERATIONS);  
+
+    if Gdx.input.isKeyPressed(Input::Keys::BACKSLASH)
+      # puts "HI!"
+      # require 'pry'
+      # binding.pry
+    end
 
     if Gdx.input.isKeyPressed(Input::Keys::ESCAPE)
       # @game.setScreen StartupState.new(@game)
@@ -112,6 +119,7 @@ cfg.height = $game_height
 $my_game = PhysicsDemo.new
 $app = LwjglApplication.new($my_game, cfg)
 
+binding.pry
 
 __END__
  public class PhysicsDemo implements ApplicationListener {  
