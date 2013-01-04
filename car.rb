@@ -43,6 +43,14 @@ class Car
     # @camera.position.set(@camera.viewportWidth * 0.5, @camera.viewportHeight * 0.5, 0)
     update_camera
 
+    @hud_camera = OrthographicCamera.new
+    @hud_camera.viewportWidth = $game_width
+    @hud_camera.viewportHeight = $game_height
+    @hud_camera.position.set(@hud_camera.viewportWidth * 0.5, @hud_camera.viewportHeight * 0.5, 0)
+    @hud_camera.update
+
+    @font = BitmapFont.new
+
     # GROUND
     bodyDef = BodyDef.new
     bodyDef.position.set(0,0.5)
@@ -109,7 +117,7 @@ class Car
  
     circle_def = FixtureDef.new
     circle_def.shape = CircleShape.new
-    circle_def.shape.radius = 0.7
+    circle_def.shape.radius = 0.9
     circle_def.friction = 5
     circle_def.density = 0.1
     circle_def.restitution = 0.2
@@ -160,6 +168,7 @@ class Car
     @motor2 = @world.create_joint(jd)
 
     @sprite_batch = SpriteBatch.new
+    @hud_batch = SpriteBatch.new
     @color2x2 = Texture.new(Gdx.files.internal('images/color2x2.png'))
     @chassis = Texture.new(Gdx.files.internal('images/truck_chassis.png'))
     @tire = Texture.new(Gdx.files.internal('images/truck_tire.png'))
@@ -188,8 +197,8 @@ class Car
     return if @broke
 
     Gdx.gl.glClear(GL10::GL_COLOR_BUFFER_BIT);  
-    @debug_renderer.render(@world, @camera.combined) if @do_debug_render
     @world.step(@BOX_STEP, @BOX_VELOCITY_ITERATIONS, @BOX_POSITION_ITERATIONS);  
+
 
     power = 0
     if Gdx.input.isKeyPressed(Input::Keys::LEFT)
@@ -210,12 +219,6 @@ class Car
       # @motor2.set_max_motor_torque(max_torque)
     end
 
- #    @spring1.set_max_motor_force(30 + (800* (@spring1.get_joint_translation ** 2)).abs)
- #    @spring1.set_motor_speed((@spring1.get_motor_speed - 10*@spring1.get_joint_translation)*0.4)
- # 
- #    @spring2.set_max_motor_force(30 + (800* (@spring2.get_joint_translation ** 2)).abs)
- #    @spring2.set_motor_speed((@spring2.get_motor_speed - 10*@spring2.get_joint_translation)*0.4)
- #         
     # @cart.apply_torque(0.3*power)
     
     # Drawing 
@@ -254,6 +257,8 @@ class Car
     update_camera
 
     # Images
+    #
+
     @sprite_batch.setProjectionMatrix(@camera.combined)
     @sprite_batch.begin
 
@@ -347,7 +352,15 @@ class Car
       # )
     end
 
+
     @sprite_batch.end
+
+    @debug_renderer.render(@world, @camera.combined) if @do_debug_render
+
+    @hud_batch.setProjectionMatrix(@hud_camera.combined)
+    @hud_batch.begin
+    @font.draw(@hud_batch, "P -> Play, Q -> Quit", 8, 20);
+    @hud_batch.end
 
   rescue Exception => e
     debug_exception e
