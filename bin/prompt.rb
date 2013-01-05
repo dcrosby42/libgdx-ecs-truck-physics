@@ -1,7 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + "/../lib/ruby/environment") 
 
 require 'math_utils'
-require 'car'
+require 'title_screen'
 
 $game_width = 1024
 $game_height = 720
@@ -14,7 +14,7 @@ $cfg.height = $game_height
 
 class MyGame < Game
   def create
-    $screen = Car.new
+    $screen = TitleScreen.new
     self.setScreen($screen)
   end
 end
@@ -23,11 +23,30 @@ def debug_exception(e)
   puts "EXCEPTION: #{e.message}\n\t#{e.backtrace.join("\n\t")}"
 end
 
+def load_source(name)
+  # puts "load_source #{name}"
+  fname = lookup_source(name)
+  $watcher.watch_for_mods fname
+  load fname
+end
+
+def lookup_source(name)
+  fname = "lib/ruby/#{name}.rb"
+  if File.exists?(fname)
+    fname
+  else
+    raise("Can't see source file #{fname}")
+  end
+end
+
 def reload_car
   puts "Reload Car! @ #{Time.now}"
   $app.post_runnable do
     begin
-      load "lib/ruby/car.rb"
+      load_source("car")
+      Car.source_dependencies.each do |dep|
+        load_source(dep)
+      end
       $screen = Car.new
       $game.set_screen $screen
     rescue Exception => e
@@ -37,22 +56,22 @@ def reload_car
   end
 end
 
-$car_source_time = File.stat("lib/ruby/car.rb").mtime
-Thread.abort_on_exception = true
-Thread.new do
-  loop do
-    sleep 0.2
-    mtime = File.stat("lib/ruby/car.rb").mtime 
-    if mtime != $car_source_time
-      $car_source_time = mtime
-      reload_car
-    end
-  end
+require 'file_watcher'
+$watcher = FileWatcher.new
+$watcher.on_file_changed do |fname|
+  puts "Change to #{fname}"
+  reload_car
 end
+$watcher.run
+
+
 
 $game = MyGame.new
 $app = LwjglApplication.new($game, $cfg)
 
+reload_car
+
 require 'pry'
 binding.pry
+
 
