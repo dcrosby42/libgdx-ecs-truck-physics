@@ -25,6 +25,34 @@ class Car
 
     @physics_system = PhysicsSystem.new
 
+    create_main_camera
+
+    create_ground
+    
+    create_truck
+
+    @sprite_batch = SpriteBatch.new
+
+    @color2x2 = Texture.new(Gdx.files.internal('images/color2x2.png'))
+    @chassis = Texture.new(Gdx.files.internal('images/truck_chassis.png'))
+    @tire = Texture.new(Gdx.files.internal('images/truck_tire.png'))
+
+    @shape_renderer = ShapeRenderer.new
+
+    @wheel1_rend = make_renderable(texture: @tire, texture_scale: 0.022)
+    @wheel2_rend = make_renderable(texture: @tire, texture_scale: 0.022)
+    @truck_body_rend = make_renderable(texture: @chassis, texture_scale: 0.022, offset_x: -0.15, offset_y: 0.75)
+
+    create_hud_camera
+    @hud_batch = SpriteBatch.new
+    @font = BitmapFont.new
+
+  rescue Exception => e
+    debug_exception e
+    @broke = true
+  end
+
+  def create_main_camera
     # CAMERA
     @camera = OrthographicCamera.new
     @zoom_factor = 35
@@ -34,33 +62,14 @@ class Car
     # @camera.viewportHeight = $game_height
     @look_at = vec2(@camera.viewportWidth * 0.5, @camera.viewportHeight * 0.5)
     # @camera.position.set(@camera.viewportWidth * 0.5, @camera.viewportHeight * 0.5, 0)
+  end
 
+  def create_hud_camera
     @hud_camera = OrthographicCamera.new
     @hud_camera.viewportWidth = $game_width
     @hud_camera.viewportHeight = $game_height
     @hud_camera.position.set(@hud_camera.viewportWidth * 0.5, @hud_camera.viewportHeight * 0.5, 0)
     @hud_camera.update
-
-    create_ground
-    
-    create_truck
-
-    @sprite_batch = SpriteBatch.new
-    @hud_batch = SpriteBatch.new
-    @color2x2 = Texture.new(Gdx.files.internal('images/color2x2.png'))
-    @chassis = Texture.new(Gdx.files.internal('images/truck_chassis.png'))
-    @tire = Texture.new(Gdx.files.internal('images/truck_tire.png'))
-
-    @shape_renderer = ShapeRenderer.new
-    @font = BitmapFont.new
-
-    @wheel1_rend = make_renderable(texture: @tire, texture_scale: 0.022)
-    @wheel2_rend = make_renderable(texture: @tire, texture_scale: 0.022)
-    @truck_body_rend = make_renderable(texture: @chassis, texture_scale: 0.022, offset_x: -0.15, offset_y: 0.75)
-
-  rescue Exception => e
-    debug_exception e
-    @broke = true
   end
 
   def create_ground
