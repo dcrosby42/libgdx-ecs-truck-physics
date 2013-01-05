@@ -56,20 +56,16 @@ $cfg.height = $game_height
 
 
 # require 'startup_state'
-require 'ball'
+# require 'ball'
+
+require 'math_utils'
 require 'car'
+
 class MyGame < Game
-#   include ApplicationListener
-# 
   def create
     $screen = Car.new
     self.setScreen($screen)
   end
-# 
-#   def increment_game_clock(seconds)
-#     @game_clock += (seconds)
-#   end
-# 
 end
 
 def debug_exception(e)
