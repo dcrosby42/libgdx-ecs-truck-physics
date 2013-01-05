@@ -8,29 +8,22 @@ class Car
   def vec2(x,y)
     Vector2.new(x,y)
   end
+
   def rad2deg(r)
     r * 180 / Math::PI 
   end
 
   def show
     return if @broke
-    @BOX_STEP = 1.0/60  
-    @BOX_VELOCITY_ITERATIONS = 30
-    @BOX_POSITION_ITERATIONS = 30
-    # @WORLD_TO_BOX = 0.01
-    # @BOX_WORLD_TO = 100  
 
-    # WORLD
-    gravity = Vector2.new(0,-10)
-    do_sleep = true # performance improve: don't simulate resting bodies
-    @world = World.new(gravity, do_sleep)
-    @debug_renderer = Box2DDebugRenderer.new
-    @debug_renderer.setDrawAABBs(false)
-    # @debug_renderer.draw_aab_bs = true
-    @debug_renderer.draw_bodies = true
-    @debug_renderer.draw_inactive_bodies = true
+    # @input_processor = DebugInputProcessor.new
+    @input_processor = MyInputProcessor.new
+    Gdx.input.setInputProcessor @input_processor
 
-    @do_debug_render = true
+    @physics_component = PhysicsComponent.new
+    @world = @physics_component.world
+
+    @physics_system = PhysicsSystem.new
 
     # CAMERA
     @camera = OrthographicCamera.new
@@ -41,7 +34,6 @@ class Car
     # @camera.viewportHeight = $game_height
     @look_at = vec2(@camera.viewportWidth * 0.5, @camera.viewportHeight * 0.5)
     # @camera.position.set(@camera.viewportWidth * 0.5, @camera.viewportHeight * 0.5, 0)
-    update_camera
 
     @hud_camera = OrthographicCamera.new
     @hud_camera.viewportWidth = $game_width
@@ -49,12 +41,33 @@ class Car
     @hud_camera.position.set(@hud_camera.viewportWidth * 0.5, @hud_camera.viewportHeight * 0.5, 0)
     @hud_camera.update
 
+    create_ground
+    
+    create_truck
+
+    @sprite_batch = SpriteBatch.new
+    @hud_batch = SpriteBatch.new
+    @color2x2 = Texture.new(Gdx.files.internal('images/color2x2.png'))
+    @chassis = Texture.new(Gdx.files.internal('images/truck_chassis.png'))
+    @tire = Texture.new(Gdx.files.internal('images/truck_tire.png'))
+
+    @shape_renderer = ShapeRenderer.new
     @font = BitmapFont.new
 
+    @wheel1_rend = make_renderable(texture: @tire, texture_scale: 0.022)
+    @wheel2_rend = make_renderable(texture: @tire, texture_scale: 0.022)
+    @truck_body_rend = make_renderable(texture: @chassis, texture_scale: 0.022, offset_x: -0.15, offset_y: 0.75)
+
+  rescue Exception => e
+    debug_exception e
+    @broke = true
+  end
+
+  def create_ground
     # GROUND
-    bodyDef = BodyDef.new
-    bodyDef.position.set(0,0.5)
-    body = @world.createBody(bodyDef)
+    ground_def = BodyDef.new
+    ground_def.position.set(0,0.5)
+    @ground = @world.createBody(ground_def)
 
     poly = PolygonShape.new
     poly.setAsBox(50, 0.5)
@@ -62,35 +75,36 @@ class Car
     box_def.shape = poly
     box_def.friction = 1
     box_def.density = 0
-    body.createFixture(box_def)
+    @ground.createFixture(box_def)
 
     poly.setAsBox(1, 2, vec2(-50, 0.5), 0)
-    body.createFixture(box_def)
+    @ground.createFixture(box_def)
 
     poly.setAsBox(1, 2, vec2(50, 0.5), 0)
-    body.createFixture(box_def)
+    @ground.createFixture(box_def)
     
     poly.setAsBox(3, 0.5, vec2(5, 1.5), Math::PI / 4)
-    body.createFixture(box_def)
+    @ground.createFixture(box_def)
  
     poly.setAsBox(3, 0.5, vec2(3.5, 1), Math::PI / 8)
-    body.createFixture(box_def)
+    @ground.createFixture(box_def)
  
     poly.setAsBox(3, 0.5, vec2(9, 1.5), -Math::PI / 4)
-    body.createFixture(box_def)
+    @ground.createFixture(box_def)
  
     poly.setAsBox(3, 0.5, vec2(10.5, 1), -Math::PI / 8)
-    body.createFixture(box_def)
+    @ground.createFixture(box_def)
 
-    body.reset_mass_data
-    
-    # CART
-    @cart_x = 20
-    @cart_y = 2.5
+    @ground.reset_mass_data
+  end
+
+  def create_truck
+    @truck_body_x = 10
+    @truck_body_y = 6
     body_def = BodyDef.new
     body_def.type = BodyDef::BodyType::DynamicBody  
-    body_def.position.set(@cart_x, @cart_y)
-    @cart = @world.createBody(body_def)
+    body_def.position.set(@truck_body_x, @truck_body_y)
+    @truck_body = @world.createBody(body_def)
  
     box_def = FixtureDef.new
     box_def.shape = PolygonShape.new
@@ -110,9 +124,9 @@ class Car
                       vec2(3,0.7),
     ].to_java(Vector2))
 
-    @cart.createFixture(box_def)
+    @truck_body.createFixture(box_def)
 
-    @cart.reset_mass_data
+    @truck_body.reset_mass_data
  
  
     circle_def = FixtureDef.new
@@ -126,60 +140,30 @@ class Car
     wheel_def = BodyDef.new
     wheel_def.type = BodyDef::BodyType::DynamicBody
     wheel_def.allowSleep = false 
-    wheel_def.position.set(@cart_x - 2, @cart_y - 0.6)
+    wheel_def.position.set(@truck_body_x - 2, @truck_body_y - 0.6)
 
     @wheel1 = @world.create_body(wheel_def)
     @wheel1.create_fixture(circle_def)
     @wheel1.reset_mass_data
 
-    wheel_def.position.set(@cart_x + 2, @cart_y - 0.6)
+    wheel_def.position.set(@truck_body_x + 2, @truck_body_y - 0.6)
     @wheel2 = @world.create_body(wheel_def)
     @wheel2.create_fixture(circle_def)
     @wheel2.reset_mass_data
- 
-    # rdef = RevoluteJointDef.new
-    # rdef.enableMotor = true
-    # rdef.initialize__method(@cart, @wheel1, @wheel1.world_center)
-    # @motor1 = @world.create_joint(rdef)
 
-    # rdef.initialize__method(@cart, @wheel2, @wheel2.world_center)
-    # @motor2 = @world.create_joint(rdef)
-    
-# jd.Initialize(m_car, m_wheel1, m_wheel1->GetPosition(), axis);
-# 			jd.motorSpeed = 0.0f;
-# 			jd.maxMotorTorque = 20.0f;
-# 			jd.enableMotor = true;
-# 			jd.frequencyHz = m_hz;
-# 			jd.dampingRatio = m_zeta;
-# 			m_spring1 = (b2WheelJoint*)m_world->CreateJoint(&jd);
-    
     jd = WheelJointDef.new
-    jd.initialize__method(@cart, @wheel1, @wheel1.world_center, vec2(0,1.0))
+    jd.initialize__method(@truck_body, @wheel1, @wheel1.world_center, vec2(0,1.0))
     jd.motorSpeed = 0
     jd.maxMotorTorque = 20.0
     jd.enableMotor = true
     jd.frequencyHz = 50
     jd.dampingRatio = 5
     @motor1 = @world.create_joint(jd)
-    
-    # @motor1 = @world.create_joint(wdef)
 
-    jd.initialize__method(@cart, @wheel2, @wheel2.world_center, vec2(0,1.0))
+    jd.initialize__method(@truck_body, @wheel2, @wheel2.world_center, vec2(0,1.0))
     @motor2 = @world.create_joint(jd)
-
-    @sprite_batch = SpriteBatch.new
-    @hud_batch = SpriteBatch.new
-    @color2x2 = Texture.new(Gdx.files.internal('images/color2x2.png'))
-    @chassis = Texture.new(Gdx.files.internal('images/truck_chassis.png'))
-    @tire = Texture.new(Gdx.files.internal('images/truck_tire.png'))
-
-    @shape_renderer = ShapeRenderer.new
-
-
-  rescue Exception => e
-    debug_exception e
-    @broke = true
   end
+
 
   # One of the API methods
   def hide
@@ -187,52 +171,11 @@ class Car
   end
 
   def update_camera
-    @camera.position.set(@look_at.x, @look_at.y, 0)
-    @camera.update
-  end
-
-  def render(d)
-    reload_car if Gdx.input.isKeyPressed(Input::Keys::BACKSLASH)
-    Gdx.app.exit if Gdx.input.isKeyPressed(Input::Keys::ESCAPE)
-    return if @broke
-
-    Gdx.gl.glClear(GL10::GL_COLOR_BUFFER_BIT);  
-    @world.step(@BOX_STEP, @BOX_VELOCITY_ITERATIONS, @BOX_POSITION_ITERATIONS);  
-
-
-    power = 0
-    if Gdx.input.isKeyPressed(Input::Keys::LEFT)
-      @manual_camera = false
-      power = 100
-    elsif Gdx.input.isKeyPressed(Input::Keys::RIGHT)
-      @manual_camera = false
-      power = -100
-    end
-
-    if @motor1
-      @motor1.set_motor_speed(power)
-      # @motor1.set_max_motor_torque(max_torque)
-    end
- 
-    if @motor2
-      @motor2.set_motor_speed(power)
-      # @motor2.set_max_motor_torque(max_torque)
-    end
-
-    # @cart.apply_torque(0.3*power)
-    
-    # Drawing 
-    # @shape_renderer.setProjectionMatrix(@camera.combined)
-    # @shape_renderer.begin(ShapeRenderer::ShapeType::Line)
-    # @shape_renderer.setColor(1, 0, 0, 1);
-    # @shape_renderer.line(0,0, 20,20);
-    # @shape_renderer.end
-
-    if Gdx.input.isKeyPressed(Input::Keys::W)
+    if @input_processor.key_down?(Input::Keys::W)
       @zoom_factor += 1
       @zoom_factor = 1 if @zoom_factor < 1
     end
-    if Gdx.input.isKeyPressed(Input::Keys::S)
+    if @input_processor.key_down?(Input::Keys::S)
       @zoom_factor -= 1
     end
 
@@ -251,121 +194,101 @@ class Car
 
     # Camera follows vehicle
     unless @manual_camera
-      @look_at.x = @cart.position.x
-      @look_at.y = @cart.position.y + 7
+      @look_at.x = @truck_body.position.x
+      @look_at.y = @truck_body.position.y + 7
     end
+
+    @camera.position.set(@look_at.x, @look_at.y, 0)
+    @camera.update
+  end
+
+  def render(delta)
+    update_everything delta
+    draw_everything
+  end
+
+  def update_everything(delta)
+    # Level / reload control:
+    reload_car if @input_processor.key_pressed?(Input::Keys::BACKSLASH)
+    Gdx.app.exit if @input_processor.key_pressed?(Input::Keys::ESCAPE)
+    return if @broke
+
+
+    update_truck
+    
     update_camera
 
-    # Images
-    #
+    @physics_system.tick(delta, @physics_component)
+
+    @input_processor.clear
+
+  rescue Exception => e
+    debug_exception e
+    @broke = true
+  end
+
+  def update_truck
+    power = 0
+    if @input_processor.key_down?(Input::Keys::LEFT)
+      @manual_camera = false
+      power = 100
+    elsif @input_processor.key_down?(Input::Keys::RIGHT)
+      @manual_camera = false
+      power = -100
+    end
+
+    if @motor1
+      @motor1.set_motor_speed(power)
+      # @motor1.set_max_motor_torque(max_torque)
+    end
+ 
+    if @motor2
+      @motor2.set_motor_speed(power)
+      # @motor2.set_max_motor_torque(max_torque)
+    end
+
+    @truck_body.apply_torque(0.3*power)
+  end
+
+  def draw_everything
+    Gdx.gl.glClear(GL10::GL_COLOR_BUFFER_BIT);  
 
     @sprite_batch.setProjectionMatrix(@camera.combined)
     @sprite_batch.begin
 
-
-      # batch.draw(
-      #   render_comp.image,                          # Texture
-      #   loc_comp.x, loc_comp.y,                     # x, y
-      #   render_comp.width/2, render_comp.height/2,  # originX, originY
-      #   render_comp.width, render_comp.height,      # width, height
-      #   1.0, 1.0,                                   # scaleX, scaleY
-      #   render_comp.rotation,                       # rotation
-      #   0, 0,                                       # srcX, srcY
-      #   render_comp.width, render_comp.height,      # srcWidth, srcHeight
-      #   false, false                                # flipX, flipY
-      # )
-
-    if false
-      @sprite_batch.draw(
-        @color2x2, 
-        @cart.position.x - 1, @cart.position.y,
-        1,0, #@color2x2.width/2.0, @color2x2.height/2.0,
-        @color2x2.width, @color2x2.height,
-        1.0, 1.0,
-        rad2deg(@cart.getAngle),
-        0,0,
-        @color2x2.width, @color2x2.height,
-        false,false
-      )
-    end
-
-
     if true
-      scale = 0.022
-      tsw = @tire.width * scale
-      tsh = @tire.height * scale
-      @sprite_batch.draw(
-        @tire, 
-        @wheel1.position.x - (tsw/2), @wheel1.position.y - (tsh/2), 
-        (tsw/2), (tsh/2),
-        @tire.width*scale, @tire.height*scale,
-        1.0, 1.0,
-        rad2deg(@wheel1.getAngle),
-        0,0,
-        @tire.width, @tire.height,
-        false,false
-      )
-      @sprite_batch.draw(
-        @tire, 
-        @wheel2.position.x - (tsw/2), @wheel2.position.y - (tsh/2), 
-        (tsw/2), (tsh/2),
-        @tire.width*scale, @tire.height*scale,
-        1.0, 1.0,
-        rad2deg(@wheel2.getAngle),
-        0,0,
-        @tire.width, @tire.height,
-        false,false
-      )
-    end
+      update_renderable @wheel1_rend, @wheel1
+      update_renderable @wheel2_rend, @wheel2
+      update_renderable @truck_body_rend, @truck_body
 
-    if true
-      scale = 0.022
-      # csw = @chassis.width * scale
-      # csh = @chassis.height * scale
-      @sprite_batch.draw(
-        @chassis, 
-        @cart.position.x-3.3, @cart.position.y, 
-        3.3, 0,
-        @chassis.width*scale, @chassis.height*scale,
-        1.0, 1.0,
-        rad2deg(@cart.getAngle),
-        0,0,
-        @chassis.width, @chassis.height,
-        false,false
-      )
+      draw_renderable @sprite_batch, @wheel1_rend
+      draw_renderable @sprite_batch, @wheel2_rend
+      draw_renderable @sprite_batch, @truck_body_rend
     end
-
-    if false
-      scale = 0.022
-      # csw = @chassis.width * scale
-      # csh = @chassis.height * scale
-      @sprite_batch.draw(
-        @chassis, 
-        @cart.position.x, @cart.position.y,
-        @chassis.width*scale, @chassis.height*scale
-      )
-      #   scale,scale,
-      #   rad2deg(@cart.getAngle),
-      #   0,0,
-      #   @chassis.width, @chassis.height,
-      #   false,false
-      # )
-    end
-
 
     @sprite_batch.end
 
-    @debug_renderer.render(@world, @camera.combined) if @do_debug_render
+    if @physics_component.do_debug_render
+      @physics_component.debug_renderer.render(@physics_component.world, @camera.combined) if @physics_component.do_debug_render
+    end
 
     @hud_batch.setProjectionMatrix(@hud_camera.combined)
     @hud_batch.begin
     @font.draw(@hud_batch, "P -> Play, Q -> Quit", 8, 20);
     @hud_batch.end
 
+    # Drawing shapes using GL utils:
+    # @shape_renderer.setProjectionMatrix(@camera.combined)
+    # @shape_renderer.begin(ShapeRenderer::ShapeType::Line)
+    # @shape_renderer.setColor(1, 0, 0, 1);
+    # @shape_renderer.line(0,0, 20,20);
+    # @shape_renderer.end
+
   rescue Exception => e
     debug_exception e
     @broke = true
   end
+
 
   def resize(w,h)
   end
@@ -379,4 +302,197 @@ class Car
   def dispose
   end
 
+  class Renderable 
+    attr_accessor :texture,
+      :texture_scale,
+      :center_x, :center_y,
+      :offset_x, :offset_y,
+      :x, :y,
+      :origin_x, :origin_y,
+      :width, :height,
+      :scale_x, :scale_y,
+      :angle_degrees,
+      :source_x, :source_y,
+      :source_width, :source_height,
+      :flip_x, :flip_y
+  end
+
+  def make_renderable(opts={})
+    r = Renderable.new
+    r.texture = opts[:texture] || raise("Texture required")
+    texture_scale = opts[:texture_scale] || 1.0
+    r.width = texture_scale * r.texture.width
+    r.height = texture_scale * r.texture.height
+    r.center_x = r.width / 2.0 - (opts[:offset_x] || 0.0)
+    r.center_y = r.height / 2.0 - (opts[:offset_y] || 0.0)
+    r.x = 0
+    r.y = 0
+    r.origin_x = r.center_x
+    r.origin_y = r.center_y
+    r.scale_x = 1.0
+    r.scale_y = 1.0
+    r.angle_degrees = 0
+    r.source_x = 0
+    r.source_y = 0
+    r.source_width = r.texture.width
+    r.source_height = r.texture.height
+    r.flip_x = false
+    r.flip_y = false
+    r
+  end
+
+  def update_renderable(r, body)
+    r.x = body.position.x - r.center_x
+    r.y = body.position.y - r.center_y
+    r.angle_degrees = rad2deg(body.angle)
+    r
+  end
+
+  def draw_renderable(sprite_batch, r)
+    sprite_batch.draw(
+      r.texture,
+      r.x, r.y,
+      r.origin_x, r.origin_y,
+      r.width, r.height,
+      r.scale_x, r.scale_y,
+      r.angle_degrees,
+      r.source_x, r.source_y,
+      r.source_width, r.source_height,
+      r.flip_x, r.flip_y
+    )
+    r
+  end
+
+  class MyInputProcessor < InputAdapter
+    attr_reader :keys_down, :keys_up, :keys_typed
+
+    def initialize
+      @keys_down = []
+      @keys_up = []
+      @keys_typed = []
+      clear
+    end
+
+    def clear
+      @keys_down.clear
+      @keys_up.clear
+      @keys_typed.clear
+    end
+
+    def keyDown(keycode)
+      @keys_down << keycode
+      true
+    end
+
+    def keyUp(keycode)
+      @keys_up << keycode
+      true
+    end
+
+    def keyTyped(char)
+      @keys_typed << char
+      true
+    end
+
+    def key_pressed?(keycode)
+      @keys_down.include?(keycode)
+    end
+
+    def key_released?(keycode)
+      @keys_up.include?(keycode)
+    end
+
+    def key_down?(keycode)
+      Gdx.input.isKeyPressed keycode
+    end
+  end
+
+  class ControlState
+    attr_accessor :toggle_hud
+  end
+
+  class DebugInputProcessor
+    include InputProcessor
+
+    def keyDown(keycode)
+      debug "keyDown #{keycode}"
+      true
+    end
+
+    def keyUp(keycode)
+      debug "keyUp #{keycode}"
+      true
+    end
+
+    def keyTyped(char)
+      str = ""
+      str << char
+      debug "keyTyped #{char.inspect} => #{str.inspect}"
+      true
+    end
+
+    def mouseMoved(x,y)
+      debug "mouseMoved #{x},#{y}"
+      false
+    end
+
+    def touchDown(x,y,pointer,button)
+      debug "touchDown #{x},#{y} pointer=#{pointer.inspect} button=#{button.inspect}"
+      false
+    end
+
+    def touchUp(x,y,pointer,button)
+      debug "touchUp #{x},#{y} pointer=#{pointer.inspect} button=#{button.inspect}"
+      false
+    end
+
+    def touchDragged(x,y,pointer)
+      debug "touchDragged #{x},#{y} pointer=#{pointer.inspect}"
+      false
+    end
+
+    def scrolled(amount)
+      debug "scrolled #{amount}"
+      false
+    end
+
+    private
+    def debug(str)
+      puts "DebugInputProcessor: #{str}"
+    end
+  end
+
+  class PhysicsComponent
+    attr_accessor :world, :step, :velocity_iterations, :position_iterations,
+                  :debug_renderer, :do_debug_render
+
+    def initialize(opts={})
+      @step = 1.0/60  
+      @velocity_iterations = 30
+      @position_iterations = 30
+
+      gravity = Vector2.new(0,-10)
+      do_sleep = true # performance improve: don't simulate resting bodies
+      @world = World.new(gravity, do_sleep)
+
+      @debug_renderer = Box2DDebugRenderer.new
+      @debug_renderer.setDrawAABBs(false)
+      # @debug_renderer.draw_aab_bs = true
+      @debug_renderer.draw_bodies = true
+      @debug_renderer.draw_inactive_bodies = true
+
+      @do_debug_render = opts[:render_debug] || true
+    end
+  end
+
+  class PhysicsSystem
+    def tick(delta, physics_component)
+      physics_component.world.step(
+        physics_component.step, 
+        physics_component.velocity_iterations, 
+        physics_component.position_iterations) 
+
+    end
+  end
 end
+
