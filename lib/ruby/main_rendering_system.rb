@@ -1,13 +1,35 @@
 
 class MainRenderingSystem
-  def tick(delta, main_viewport, renderables)
-    batch = main_viewport.sprite_batch
-    batch.setProjectionMatrix(main_viewport.camera.combined)
-    batch.begin
-    renderables.each do |r|
-      draw_renderable batch, r
+
+    # @main_rendering_system.tick(delta, @main_viewport, [
+    #   @truck_component.wheel1_rend,
+    #   @truck_component.wheel2_rend,
+    #   @truck_component.truck_body_rend,
+    # ])
+  
+  # def tick(delta, main_viewport, renderables)
+  def tick(delta, entity_manager)
+    players = entity_manager.get_all_entities_with_components_of_type([MainViewport, TruckComponent])
+    players.each do |player|
+      main_viewport = entity_manager.get_component_of_type(player, MainViewport)
+      truck_component = entity_manager.get_component_of_type(player, TruckComponent)
+
+      if main_viewport.do_renderable_renders
+        renderables = [
+          truck_component.wheel1_rend,
+          truck_component.wheel2_rend,
+          truck_component.truck_body_rend,
+        ]
+
+        batch = main_viewport.sprite_batch
+        batch.setProjectionMatrix(main_viewport.camera.combined)
+        batch.begin
+        renderables.each do |r|
+          draw_renderable batch, r
+        end
+        batch.end
+      end
     end
-    batch.end
   end
 
   private

@@ -1,7 +1,11 @@
 
 class MainViewport
   extend MathUtils
-  attr_accessor :camera, :follow_body, :look_at, :zoom_factor, :manual_camera, :sprite_batch, :game_height, :game_width
+  attr_accessor :camera, :look_at, :zoom_factor, :manual_camera, 
+    :sprite_batch, 
+    :game_height, :game_width,
+    :do_physics_debug_render,
+    :do_renderable_renders
 
   def self.create(opts={})
     mv = MainViewport.new
@@ -12,6 +16,8 @@ class MainViewport
     mv.sprite_batch = SpriteBatch.new
     mv.game_width = opts[:game_width] || raise(":game_width required")
     mv.game_height = opts[:game_height] || raise(":game_height required")
+    mv.do_physics_debug_render = opts[:do_physics_debug_render] || false
+    mv.do_renderable_renders = opts[:do_renderable_renders] || true
     mv
   end
 end

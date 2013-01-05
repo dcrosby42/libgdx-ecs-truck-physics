@@ -8,9 +8,10 @@ class PhysicsComponent
 
   def self.create(opts={})
     pc = PhysicsComponent.new
-    pc.step = 1.0/60  
-    pc.velocity_iterations = 30
-    pc.position_iterations = 30
+
+    pc.step = 1.0 / (opts[:framerate] || 60)
+    pc.velocity_iterations = 15 
+    pc.position_iterations = 15
 
     gravity = Vector2.new(0,-10)
     do_sleep = true # performance improve: don't simulate resting bodies

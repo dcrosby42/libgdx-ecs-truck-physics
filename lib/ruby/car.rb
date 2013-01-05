@@ -9,20 +9,29 @@ class Car
     @input_processor = MyInputProcessor.new
     Gdx.input.setInputProcessor @input_processor
 
+    @entity_manager = EntityManager.new
+
     #
     # COMPONENTS: 
     #
 
-    @physics_component = PhysicsComponent.create
-
-    @main_viewport = MainViewport.create(game_width: $game_width, game_height: $game_height)
-
-    GroundComponent.create(@physics_component.world)
+    physics_component = PhysicsComponent.create(framerate: 60)
+    level = @entity_manager.create_tagged_entity('level')
+    @entity_manager.add_component level, physics_component
+    @entity_manager.add_component level, GroundComponent.create(physics_component.world)
+    @entity_manager.add_component level, @input_processor # FIXME???
     
-    @truck_component = TruckComponent.create(@physics_component.world)
-    @main_viewport.follow_body = @truck_component.truck_body # FIXME
 
-    @hud_viewport = HudViewport.create(game_width: $game_width, game_height: $game_height)
+    main_viewport = MainViewport.create(game_width: $game_width, game_height: $game_height, do_physics_debug_render: true)
+    hud_viewport = HudViewport.create(game_width: $game_width, game_height: $game_height)
+
+    truck_component = TruckComponent.create(physics_component.world)
+    main_viewport.follow_body = truck_component.truck_body # FIXME
+
+    player1 = @entity_manager.create_tagged_entity('player1')
+    @entity_manager.add_component player1, main_viewport
+    @entity_manager.add_component player1, hud_viewport
+    @entity_manager.add_component player1, truck_component
 
     #
     # SYSTEMS: 
@@ -53,19 +62,15 @@ class Car
     # UPDATING
     #
 
-    @truck_system.tick(delta, @truck_component, @input_processor)
+    @truck_system.tick delta, @entity_manager 
     
-    @physics_system.tick(delta, @physics_component)
+    @physics_system.tick delta, @entity_manager 
 
-    @main_viewport_system.tick(delta, @main_viewport, @input_processor)
+    @main_viewport_system.tick delta, @entity_manager 
 
-    @hud_viewport_system.tick(delta, @hud_viewport)
+    @hud_viewport_system.tick delta, @entity_manager 
 
-    @body_renderable_system.tick(delta, [
-      [@truck_component.wheel1_rend, @truck_component.wheel1],
-      [@truck_component.wheel2_rend, @truck_component.wheel2],
-      [@truck_component.truck_body_rend, @truck_component.truck_body],
-    ])
+    @body_renderable_system.tick delta, @entity_manager 
 
     @input_processor.clear
 
@@ -75,15 +80,11 @@ class Car
 
     Gdx.gl.glClear(GL10::GL_COLOR_BUFFER_BIT);  
 
-    @main_rendering_system.tick(delta, @main_viewport, [
-      @truck_component.wheel1_rend,
-      @truck_component.wheel2_rend,
-      @truck_component.truck_body_rend,
-    ])
+    @main_rendering_system.tick delta, @entity_manager
 
-    @physics_debug_rendering_system.tick delta, @physics_component, @main_viewport
+    @physics_debug_rendering_system.tick delta, @entity_manager
 
-    @hud_rendering_system.tick(delta, @hud_viewport)
+    @hud_rendering_system.tick delta, @entity_manager
 
   rescue Exception => e
     debug_exception e
@@ -105,14 +106,9 @@ class Car
   def dispose
   end
 
-  # class ControlState
-  #   attr_accessor :toggle_hud
-  # end
-
-
-
   def self.source_dependencies
     %w{
+      entity_manager
       my_input_processor
 
       physics_component
