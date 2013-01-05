@@ -1,6 +1,8 @@
-$:.push "./lib"
-$:.push "./lib/ruby"
+lib_ruby_dir = File.expand_path(File.dirname(__FILE__))         # lib/ruby/
+lib_dir      = File.expand_path(File.dirname(__FILE__) + "/..") # lib/
 
+$LOAD_PATH.push lib_dir
+$LOAD_PATH.push lib_ruby_dir
 
 # Need a different root when inside the jar, luckily $0 is "<script>" in that case
 RELATIVE_ROOT = $0['<'] ? 'ecs_game/' : ''
@@ -44,78 +46,4 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.BitmapFont
-
-$game_width = 1024
-$game_height = 720
-
-$cfg = LwjglApplicationConfiguration.new
-$cfg.title = "Practicew"
-$cfg.useGL20 = true
-$cfg.width = $game_width
-$cfg.height = $game_height
-
-
-# require 'startup_state'
-# require 'ball'
-
-require 'math_utils'
-require 'car'
-
-class MyGame < Game
-  def create
-    $screen = Car.new
-    self.setScreen($screen)
-  end
-end
-
-def debug_exception(e)
-  puts "EXCEPTION: #{e.message}\n\t#{e.backtrace.join("\n\t")}"
-end
-
-def reload_ball
-  puts "Reload Ball!"
-  $app.post_runnable do
-    begin
-      load "ball.rb"
-      $screen = Ball.new
-      $game.set_screen $screen
-    rescue Exception => e
-      debug_exception e
-      # puts "RELOAD FAIL: #{e.message}\n\t#{e.backtrace.join("\n\t")}"
-    end
-  end
-end
-
-def reload_car
-  puts "Reload Car! @ #{Time.now}"
-  $app.post_runnable do
-    begin
-      load "car.rb"
-      $screen = Car.new
-      $game.set_screen $screen
-    rescue Exception => e
-      debug_exception e
-      # puts "RELOAD FAIL: #{e.message}\n\t#{e.backtrace.join("\n\t")}"
-    end
-  end
-end
-
-$car_source_time = File.stat("car.rb").mtime
-Thread.abort_on_exception = true
-Thread.new do
-  loop do
-    sleep 0.2
-    mtime = File.stat("car.rb").mtime 
-    if mtime != $car_source_time
-      $car_source_time = mtime
-      reload_car
-    end
-  end
-end
-
-$game = MyGame.new
-$app = LwjglApplication.new($game, $cfg)
-
-require 'pry'
-binding.pry
 
