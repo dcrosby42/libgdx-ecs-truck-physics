@@ -32,6 +32,9 @@ class Car
     @entity_manager.add_component player1, main_viewport
     @entity_manager.add_component player1, hud_viewport
     @entity_manager.add_component player1, truck_component
+    @entity_manager.add_component player1, DebugComponent.create([
+      [ TruckComponent, ->(c){c.wheel1.angle}, "Wheel1 angle" ],
+    ])
 
     #
     # SYSTEMS: 
@@ -46,6 +49,7 @@ class Car
     @main_rendering_system = MainRenderingSystem.new
     @physics_debug_rendering_system = PhysicsDebugRenderingSystem.new
     @hud_rendering_system = HudRenderingSystem.new
+    @debug_system = DebugSystem.new
 
   rescue Exception => e
     debug_exception e
@@ -67,7 +71,9 @@ class Car
     @physics_system.tick delta, @entity_manager 
 
     @main_viewport_system.tick delta, @entity_manager 
-
+    
+    @debug_system.tick delta, @entity_manager 
+    
     @hud_viewport_system.tick delta, @entity_manager 
 
     @body_renderable_system.tick delta, @entity_manager 
@@ -126,6 +132,9 @@ class Car
       physics_debug_rendering_system
       hud_rendering_system
       ground_component
+
+      debug_component
+      debug_system
     }
   end
 end

@@ -6,14 +6,25 @@ class HudRenderingSystem
       hv = entity_manager.get_component_of_type(e, HudViewport)
       hv.sprite_batch.setProjectionMatrix(hv.camera.combined)
       hv.sprite_batch.begin
-      # hv.font.draw(hv.sprite_batch, "Upper left", 8, 20*36);
-      # hv.font.draw(hv.sprite_batch, "Upper left", 8, 20*35);
-      hv.font.draw(hv.sprite_batch, "F1: draw physics, F2: renderables", 8, 40);
-      hv.font.draw(hv.sprite_batch, "Drive: Left/Right.  Zoom: W/S.  Pan: A/D.  Reload: \\", 8, 20);
+      lines = [
+        "Drive: Left/Right.  Zoom: W/S.  Pan: A/D.  Reload: \\",
+        "F1: draw physics, F2: renderables",
+      ]
+
+      (lines + hv.debug_lines).each.with_index do |line,i|
+        hv.font.draw(hv.sprite_batch, line, 8, (i+1)*20);
+      end
+
       hv.sprite_batch.end
     end
   end
 end
 
 # truck_component.wheel1.angle
+# truck_component.wheel2.angle
+# "Player1 wheels: #{a1}, #{a2}"
+#
+# a = truck_component.wheel1.angle
+# 
+# "Player1 wheels: #{a1}, #{a2}"
 

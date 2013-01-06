@@ -1,6 +1,6 @@
 
 class HudViewport
-  attr_accessor :camera, :sprite_batch, :font, :game_height, :game_width
+  attr_accessor :camera, :sprite_batch, :font, :game_height, :game_width, :debug_lines
 
   def self.create(opts={})
     hv = HudViewport.new
@@ -11,6 +11,7 @@ class HudViewport
     hv.camera.viewportHeight = hv.game_height
     hv.camera.position.set(hv.camera.viewportWidth * 0.5, hv.camera.viewportHeight * 0.5, 0)
     hv.camera.update
+    hv.debug_lines = []
 
     hv.sprite_batch = SpriteBatch.new
     hv.font = BitmapFont.new
