@@ -8,7 +8,8 @@ class HudRenderingSystem
       hv.sprite_batch.begin
       lines = [
         "Drive: Left/Right.  Zoom: W/S.  Pan: A/D.  Reload: \\",
-        "F1: draw physics, F2: renderables",
+        "F1: draw physics, F2: renderables, F3: debugz",
+        # "FPS: #{hv.current_fps} Time per loop: #{hv.time_per_loop}"
       ]
 
       (lines + hv.debug_lines).each.with_index do |line,i|

@@ -1,11 +1,10 @@
 
 class HudViewportSystem
   def tick(delta, entity_manager)
-    entities = entity_manager.get_all_entities_with_component_of_type(HudViewport)
-    entities.each do |e|
-      hv = entity_manager.get_component_of_type(e, HudViewport)
-
-      hv.camera.update
-    end
+    level = entity_manager.get_all_entities_with_tag("level").first || raise("Can't find the 'level' entity!")
+    hud_viewport = entity_manager.get_component_of_type(level, HudViewport)
+    # entity_manager.get_all_components_of_type(HudViewport).each do |hv|
+    hud_viewport.camera.update
+    # end
   end
 end

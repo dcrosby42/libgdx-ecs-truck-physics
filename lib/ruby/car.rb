@@ -16,21 +16,28 @@ class Car
     #
 
     physics_component = PhysicsComponent.create(framerate: 60)
+    @stats_component = StatsComponent.create
+    @stats_component.expected_framerate = 60
     level = @entity_manager.create_tagged_entity('level')
     @entity_manager.add_component level, physics_component
     @entity_manager.add_component level, GroundComponent.create(physics_component.world)
     @entity_manager.add_component level, @input_processor # FIXME???
-    
+    hud_viewport = HudViewport.create(game_width: $game_width, game_height: $game_height)
+    @entity_manager.add_component level, hud_viewport
+    @entity_manager.add_component level, @stats_component
+    @entity_manager.add_component level, DebugComponent.create([
+      [ StatsComponent, ->(c){c.fps}, "FPS" ],
+      [ StatsComponent, ->(c){c.time_per_loop}, "Time-per-loop" ],
+      [ StatsComponent, ->(c){c.utilization}, "Render load" ],
+    ])
 
     main_viewport = MainViewport.create(game_width: $game_width, game_height: $game_height, do_physics_debug_render: true)
-    hud_viewport = HudViewport.create(game_width: $game_width, game_height: $game_height)
 
     truck_component = TruckComponent.create(world: physics_component.world)
     main_viewport.follow_body = truck_component.truck_body # FIXME
 
     player1 = @entity_manager.create_tagged_entity('player1')
     @entity_manager.add_component player1, main_viewport
-    @entity_manager.add_component player1, hud_viewport
     @entity_manager.add_component player1, truck_component
     @entity_manager.add_component player1, DebugComponent.create([
       [ TruckComponent, ->(c){c.wheel1.angle}, "Wheel1 angle" ],
@@ -50,6 +57,7 @@ class Car
     @physics_debug_rendering_system = PhysicsDebugRenderingSystem.new
     @hud_rendering_system = HudRenderingSystem.new
     @debug_system = DebugSystem.new
+    @stats_system = StatsSystem.new
 
   rescue Exception => e
     debug_exception e
@@ -57,6 +65,7 @@ class Car
   end
 
   def render(delta)
+    render_start_time = Time.now
     # Level / reload control:
     reload_car if @input_processor.key_pressed?(Input::Keys::BACKSLASH)
     Gdx.app.exit if @input_processor.key_pressed?(Input::Keys::ESCAPE)
@@ -72,6 +81,8 @@ class Car
 
     @main_viewport_system.tick delta, @entity_manager 
     
+    @stats_system.tick delta, @entity_manager 
+
     @debug_system.tick delta, @entity_manager 
     
     @hud_viewport_system.tick delta, @entity_manager 
@@ -92,6 +103,9 @@ class Car
 
     @hud_rendering_system.tick delta, @entity_manager
 
+    # sleep 0.02
+    render_end_time = Time.now
+    @stats_component.time_per_loop = render_end_time - render_start_time
   rescue Exception => e
     debug_exception e
     @broke = true
@@ -135,6 +149,9 @@ class Car
 
       debug_component
       debug_system
+
+      stats_component
+      stats_system
     }
   end
 end

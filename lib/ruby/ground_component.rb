@@ -41,6 +41,8 @@ class GroundComponent
     gc.ground = ground
     gc.stones = []
     
+    # STONES: 
+    
     circle_def = FixtureDef.new
     circle_def.shape = CircleShape.new
     circle_def.friction = 0.1
@@ -51,7 +53,7 @@ class GroundComponent
     body_def.allowSleep = true
     body_def.linearDamping = 0.1
     body_def.angularDamping = 0.1
-    30.times do 
+    90.times do 
       circle_def.shape.radius = (rand / 10.0) + 0.2
       body_def.position.set(rand * 35 +  5, 2)
 
