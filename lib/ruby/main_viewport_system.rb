@@ -10,11 +10,12 @@ class MainViewportSystem
 
       if input_processor.key_down?(Input::Keys::W)
         mv.zoom_factor += 1
-        mv.zoom_factor = 1 if mv.zoom_factor < 1
       end
       if input_processor.key_down?(Input::Keys::S)
         mv.zoom_factor -= 1
       end
+      mv.zoom_factor = 2 if mv.zoom_factor < 2
+      mv.zoom_factor = 100 if mv.zoom_factor > 100
       if input_processor.key_down?(Input::Keys::LEFT) or input_processor.key_down?(Input::Keys::RIGHT)
         mv.manual_camera = false
       end

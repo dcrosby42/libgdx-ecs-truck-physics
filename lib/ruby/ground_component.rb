@@ -4,41 +4,83 @@ class GroundComponent
 
   def self.create(world)
 
-    ground_def = BodyDef.new
-    ground_def.position.set(0,0.5)
-    ground = world.createBody(ground_def)
+    # Ground + hill
 
-    poly = PolygonShape.new
-    poly.setAsBox(50, 0.5)
+    # ground_def = BodyDef.new
+    # ground_def.position.set(0,0.5)
+    # ground = world.createBody(ground_def)
+
+    # poly = PolygonShape.new
+    # poly.setAsBox(50, 0.5)
+    # box_def = FixtureDef.new
+    # box_def.shape = poly
+    # box_def.friction = 1
+    # box_def.density = 0
+    # ground.createFixture(box_def)
+
+    # poly.setAsBox(1, 2, vec2(-50, 0.5), 0)
+    # ground.createFixture(box_def)
+
+    # poly.setAsBox(1, 2, vec2(50, 0.5), 0)
+    # ground.createFixture(box_def)
+    # 
+    # poly.setAsBox(3, 0.5, vec2(5, 1.5), Math::PI / 4)
+    # ground.createFixture(box_def)
+ 
+    # poly.setAsBox(3, 0.5, vec2(3.5, 1), Math::PI / 8)
+    # ground.createFixture(box_def)
+ 
+    # poly.setAsBox(3, 0.5, vec2(9, 1.5), -Math::PI / 4)
+    # ground.createFixture(box_def)
+ 
+    # poly.setAsBox(3, 0.5, vec2(10.5, 1), -Math::PI / 8)
+    # ground.createFixture(box_def)
+
+    # ground.reset_mass_data
+
+    ground2_def = BodyDef.new
+    ground2_def.position.set(0,1)
+    ground2 = world.createBody(ground2_def)
+
+    data = (-50..100).step(1.0).to_a.map do |x|
+      [x, 3*Math::sin(x/5) ]
+    end
+    g2pts = vec2_array(
+      [[-50,-20]] + data + [[100,-20]]
+    )
+    # g2pts = vec2_array([
+    #   [0,0],
+    #   [100,0],
+    # ])
+
+    gline = FixtureDef.new
+    gline.shape = ChainShape.new
+    gline.shape.create_chain g2pts
+    gline.friction = 1
+    gline.density = 0
+    ground2.createFixture(gline)
+
+
     box_def = FixtureDef.new
-    box_def.shape = poly
+    box_def.shape = PolygonShape.new
+    box_def.shape.setAsBox(1, 3, vec2(-50, 2.5), 0)
     box_def.friction = 1
     box_def.density = 0
-    ground.createFixture(box_def)
+    ground2.createFixture(box_def)
 
-    poly.setAsBox(1, 2, vec2(-50, 0.5), 0)
-    ground.createFixture(box_def)
+    box_def.shape.setAsBox(1, 3, vec2(100, 2.5), 0)
+    ground2.createFixture(box_def)
 
-    poly.setAsBox(1, 2, vec2(50, 0.5), 0)
-    ground.createFixture(box_def)
-    
-    poly.setAsBox(3, 0.5, vec2(5, 1.5), Math::PI / 4)
-    ground.createFixture(box_def)
- 
-    poly.setAsBox(3, 0.5, vec2(3.5, 1), Math::PI / 8)
-    ground.createFixture(box_def)
- 
-    poly.setAsBox(3, 0.5, vec2(9, 1.5), -Math::PI / 4)
-    ground.createFixture(box_def)
- 
-    poly.setAsBox(3, 0.5, vec2(10.5, 1), -Math::PI / 8)
-    ground.createFixture(box_def)
+    # poly.setAsBox(1, 2, vec2(-50, 0.5), 0)
+    # ground.createFixture(box_def)
 
-    ground.reset_mass_data
+
+    ground2.reset_mass_data
 
     
     gc = GroundComponent.new
-    gc.ground = ground
+    # gc.ground = ground
+    gc.ground = ground2
     gc.stones = []
     
     # STONES: 
@@ -53,9 +95,9 @@ class GroundComponent
     body_def.allowSleep = true
     body_def.linearDamping = 0.1
     body_def.angularDamping = 0.1
-    90.times do 
+    30.times do 
       circle_def.shape.radius = (rand / 10.0) + 0.2
-      body_def.position.set(rand * 35 +  5, 2)
+      body_def.position.set(rand * 35 +  5, 6)
 
       body = world.create_body(body_def)
       body.create_fixture(circle_def)

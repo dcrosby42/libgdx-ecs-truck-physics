@@ -15,22 +15,36 @@ class TruckComponent
     box_def = FixtureDef.new
     box_def.shape = PolygonShape.new
     box_def.friction = 0.5
-    box_def.density = 2
+    box_def.density = 1
     box_def.restitution = 0.2
     box_def.filter.groupIndex = -1
 
-    box_def.shape.set([
-                      vec2(3,1),
-                      vec2(-3,1),
-                      vec2(-3,0.7),
-                      vec2(-1.5,0.7),
-                      vec2(-1,0.0),
-                      vec2(1,0.0),
-                      vec2(1.5,0.7),
-                      vec2(3,0.7),
-    ].to_java(Vector2))
+    body_pts = vec2_array([
+      [3,1],
+      [-3.2,1],
+      [-3.2,0.7],
+      [-1.2,0.7],
+      [-1,0.0],
+      [0.8,0.0],
+      [1.2,0.7],
+      [3,0.7]
+    ])
+    cab_pts = vec2_array([
+      [1.5, 1],
+      [0.5, 1.5],
+      [-2.8, 1.5],
+      [-3.2, 1],
+    ])
+    rear_fender_pts = vec2_array([
+      [-3.2,0.7],
+      [-3.2,0.3],
+      [-2.2,0.7],
+    ])
 
-    truck_body.createFixture(box_def)
+    [body_pts, cab_pts, rear_fender_pts].each do |pts|
+      box_def.shape.set pts 
+      truck_body.createFixture(box_def)
+    end
 
     truck_body.reset_mass_data
  
@@ -39,7 +53,7 @@ class TruckComponent
     circle_def.shape = CircleShape.new
     circle_def.shape.radius = 0.9
     circle_def.friction = 5
-    circle_def.density = 0.1
+    circle_def.density = 1#0.1
     circle_def.restitution = 0.2
     circle_def.filter.groupIndex = -1
  
@@ -62,8 +76,8 @@ class TruckComponent
     jd.motorSpeed = 0
     jd.maxMotorTorque = 20.0
     jd.enableMotor = true
-    jd.frequencyHz = 50
-    jd.dampingRatio = 5
+    jd.frequencyHz = 5
+    jd.dampingRatio = 0.7
     motor1 = world.create_joint(jd)
 
     jd.initialize__method(truck_body, wheel2, wheel2.world_center, vec2(0,1.0))

@@ -71,6 +71,10 @@ $app = LwjglApplication.new($game, $cfg)
 
 reload_car
 
+def get_truck
+  $screen.instance_variable_get(:@entity_manager).get_all_components_of_type(TruckComponent).first
+end
+
 require 'pry'
 binding.pry
 

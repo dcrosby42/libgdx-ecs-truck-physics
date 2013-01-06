@@ -31,7 +31,9 @@ class Car
       [ StatsComponent, ->(c){c.utilization}, "Render load" ],
     ])
 
-    main_viewport = MainViewport.create(game_width: $game_width, game_height: $game_height, do_physics_debug_render: true)
+    main_viewport = MainViewport.create(game_width: $game_width, game_height: $game_height, 
+                                        do_physics_debug_render: true,
+                                        do_renderable_renders: false)
 
     truck_component = TruckComponent.create(world: physics_component.world)
     main_viewport.follow_body = truck_component.truck_body # FIXME
