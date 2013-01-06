@@ -42,6 +42,7 @@ class Car
     @entity_manager.add_component player1, main_viewport
     @entity_manager.add_component player1, truck_component
     @entity_manager.add_component player1, DebugComponent.create([
+      [ TruckComponent, ->(c){c.wheel2.angle}, "Wheel2 angle" ],
       [ TruckComponent, ->(c){c.wheel1.angle}, "Wheel1 angle" ],
     ])
 
