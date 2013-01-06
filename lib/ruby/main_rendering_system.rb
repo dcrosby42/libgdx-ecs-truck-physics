@@ -18,11 +18,13 @@ class MainRenderingSystem
       truck_component = entity_manager.get_component_of_type(player, TruckComponent)
 
       if main_viewport.do_renderable_renders
+        # Truck and stones etc:
         renderables = [
           truck_component.wheel1_rend,
           truck_component.wheel2_rend,
           truck_component.truck_body_rend,
         ] + ground_component.rend_body_pairs.map do |x| x.first end
+
         
         batch = main_viewport.sprite_batch
         batch.setProjectionMatrix(main_viewport.camera.combined)
@@ -31,6 +33,15 @@ class MainRenderingSystem
           draw_renderable batch, r
         end
         batch.end
+
+        # Ground contour:
+        
+      # Drawing shapes using GL utils:
+      # @shape_renderer.setProjectionMatrix(@camera.combined)
+      # @shape_renderer.begin(ShapeRenderer::ShapeType::Line)
+      # @shape_renderer.setColor(1, 0, 0, 1);
+      # @shape_renderer.line(0,0, 20,20);
+      # @shape_renderer.end
       end
     end
   end

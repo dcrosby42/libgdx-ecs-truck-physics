@@ -87,10 +87,12 @@ class TruckComponent
     motor2 = world.create_joint(jd)
 
     # RENDERABLES
-    chassis = Texture.new(Gdx.files.internal('images/truck_chassis.png'))
+    # chassis = Texture.new(Gdx.files.internal(RELATIVE_ROOT + 'images/truck_chassis.png'))
+    chassis = load_texture('truck_chassis.png')
     truck_body_rend = Renderable.create(texture: chassis, texture_scale: 0.022, offset_x: -0.15, offset_y: 0.75)
 
-    tire = Texture.new(Gdx.files.internal('images/truck_tire.png'))
+    # tire = Texture.new(Gdx.files.internal(RELATIVE_ROOT + 'images/truck_tire.png'))
+    tire = load_texture('truck_tire.png')
     wheel1_rend = Renderable.create(texture: tire, texture_scale: 0.022)
     wheel2_rend = Renderable.create(texture: tire, texture_scale: 0.022)
 

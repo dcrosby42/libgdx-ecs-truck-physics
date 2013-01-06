@@ -86,8 +86,8 @@ class GroundComponent
     
     # STONES: 
     
-    stone1 = Texture.new(Gdx.files.internal('images/stone1.png'))
-    # wheel2_rend = Renderable.create(texture: tire, texture_scale: 0.022)
+    # stone1 = Texture.new(Gdx.files.internal(RELATIVE_ROOT + 'images/stone1.png'))
+    stone1 = load_texture("stone1.png")
 
     circle_def = FixtureDef.new
     circle_def.shape = CircleShape.new

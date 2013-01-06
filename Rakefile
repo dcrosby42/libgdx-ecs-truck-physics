@@ -1,3 +1,5 @@
+require 'warbler'
+Warbler::Task.new
 
 task :default do
   puts 
