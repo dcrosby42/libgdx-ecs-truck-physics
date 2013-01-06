@@ -71,19 +71,22 @@ class TruckComponent
     wheel2.create_fixture(circle_def)
     wheel2.reset_mass_data
 
+    #
+    # WHEEL JOINTS
+    #
     jd = WheelJointDef.new
     jd.initialize__method(truck_body, wheel1, wheel1.world_center, vec2(0,1.0))
     jd.motorSpeed = 0
-    jd.maxMotorTorque = 20.0
+    jd.maxMotorTorque = 50.0
     jd.enableMotor = true
-    jd.frequencyHz = 5
-    jd.dampingRatio = 0.7
+    jd.frequencyHz = 4
+    jd.dampingRatio = 0.5
     motor1 = world.create_joint(jd)
 
     jd.initialize__method(truck_body, wheel2, wheel2.world_center, vec2(0,1.0))
     motor2 = world.create_joint(jd)
 
-    # renderabl estuff
+    # RENDERABLES
     chassis = Texture.new(Gdx.files.internal('images/truck_chassis.png'))
     truck_body_rend = Renderable.create(texture: chassis, texture_scale: 0.022, offset_x: -0.15, offset_y: 0.75)
 

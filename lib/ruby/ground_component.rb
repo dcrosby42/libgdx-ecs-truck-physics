@@ -1,6 +1,6 @@
 class GroundComponent
   extend MathUtils
-  attr_accessor :ground, :stones
+  attr_accessor :ground, :stones, :rend_body_pairs
 
   def self.create(world)
 
@@ -78,17 +78,21 @@ class GroundComponent
     ground2.reset_mass_data
 
     
-    gc = GroundComponent.new
+    gc = new
     # gc.ground = ground
     gc.ground = ground2
     gc.stones = []
+    gc.rend_body_pairs = []
     
     # STONES: 
     
+    stone1 = Texture.new(Gdx.files.internal('images/stone1.png'))
+    # wheel2_rend = Renderable.create(texture: tire, texture_scale: 0.022)
+
     circle_def = FixtureDef.new
     circle_def.shape = CircleShape.new
-    circle_def.friction = 0.1
-    circle_def.density = 0.1
+    circle_def.friction = 0.5 
+    circle_def.density = 0.3
     circle_def.restitution = 0.5
     body_def = BodyDef.new
     body_def.type = BodyDef::BodyType::DynamicBody
@@ -96,15 +100,18 @@ class GroundComponent
     body_def.linearDamping = 0.1
     body_def.angularDamping = 0.1
     30.times do 
-      circle_def.shape.radius = (rand / 10.0) + 0.2
+      # circle_def.shape.radius = (rand / 10.0) + 0.2
+      scaler = rand + 1
+      circle_def.shape.radius = 0.2 * scaler
       body_def.position.set(rand * 35 +  5, 6)
+      stone1_rend = Renderable.create(texture: stone1, texture_scale: 0.010 * scaler)
 
       body = world.create_body(body_def)
       body.create_fixture(circle_def)
       body.reset_mass_data
       gc.stones << body
+      gc.rend_body_pairs << [stone1_rend, body]
     end
-
 
     # # # # # 
     

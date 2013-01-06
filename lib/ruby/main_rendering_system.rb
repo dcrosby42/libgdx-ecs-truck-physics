@@ -9,6 +9,9 @@ class MainRenderingSystem
   
   # def tick(delta, main_viewport, renderables)
   def tick(delta, entity_manager)
+    level = entity_manager.get_all_entities_with_tag('level').first || raise("Need entity tagged 'level'")
+    ground_component = entity_manager.get_component_of_type(level, GroundComponent)
+
     players = entity_manager.get_all_entities_with_components_of_type([MainViewport, TruckComponent])
     players.each do |player|
       main_viewport = entity_manager.get_component_of_type(player, MainViewport)
@@ -19,8 +22,8 @@ class MainRenderingSystem
           truck_component.wheel1_rend,
           truck_component.wheel2_rend,
           truck_component.truck_body_rend,
-        ]
-
+        ] + ground_component.rend_body_pairs.map do |x| x.first end
+        
         batch = main_viewport.sprite_batch
         batch.setProjectionMatrix(main_viewport.camera.combined)
         batch.begin
