@@ -1,8 +1,9 @@
 class GroundComponent
   extend MathUtils
-  attr_accessor :ground
+  attr_accessor :ground, :stones
 
   def self.create(world)
+
     ground_def = BodyDef.new
     ground_def.position.set(0,0.5)
     ground = world.createBody(ground_def)
@@ -35,8 +36,34 @@ class GroundComponent
 
     ground.reset_mass_data
 
+    
     gc = GroundComponent.new
     gc.ground = ground
+    gc.stones = []
+    
+    circle_def = FixtureDef.new
+    circle_def.shape = CircleShape.new
+    circle_def.friction = 0.1
+    circle_def.density = 0.1
+    circle_def.restitution = 0.5
+    body_def = BodyDef.new
+    body_def.type = BodyDef::BodyType::DynamicBody
+    body_def.allowSleep = true
+    body_def.linearDamping = 0.1
+    body_def.angularDamping = 0.1
+    30.times do 
+      circle_def.shape.radius = (rand / 10.0) + 0.2
+      body_def.position.set(rand * 35 +  5, 2)
+
+      body = world.create_body(body_def)
+      body.create_fixture(circle_def)
+      body.reset_mass_data
+      gc.stones << body
+    end
+
+
+    # # # # # 
+    
     gc
   end
 

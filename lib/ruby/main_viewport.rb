@@ -5,7 +5,8 @@ class MainViewport
     :sprite_batch, 
     :game_height, :game_width,
     :do_physics_debug_render,
-    :do_renderable_renders
+    :do_renderable_renders,
+    :follow_body
 
   def self.create(opts={})
     mv = MainViewport.new

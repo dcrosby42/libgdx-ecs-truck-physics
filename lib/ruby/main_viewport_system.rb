@@ -43,7 +43,7 @@ class MainViewportSystem
       # Camera follows vehicle
       if !mv.manual_camera and !mv.follow_body.nil?
         mv.look_at.x = mv.follow_body.position.x
-        mv.look_at.y = mv.follow_body.position.y + 7
+        mv.look_at.y = mv.follow_body.position.y + 4
       end
 
       mv.camera.position.set(mv.look_at.x, mv.look_at.y, 0)
