@@ -25,7 +25,7 @@ class Car
     main_viewport = MainViewport.create(game_width: $game_width, game_height: $game_height, do_physics_debug_render: true)
     hud_viewport = HudViewport.create(game_width: $game_width, game_height: $game_height)
 
-    truck_component = TruckComponent.create(physics_component.world)
+    truck_component = TruckComponent.create(world: physics_component.world)
     main_viewport.follow_body = truck_component.truck_body # FIXME
 
     player1 = @entity_manager.create_tagged_entity('player1')

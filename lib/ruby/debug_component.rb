@@ -1,7 +1,7 @@
 class DebugComponent
-  attr_accessor :debug_items
+  attr_accessor :on, :debug_items
 
-  def self.create(defs)
+  def self.create(defs=[],opts={})
     dc = DebugComponent.new
     dc.debug_items = defs.map do |(type, func, label)|
       i = Item.new
@@ -10,6 +10,7 @@ class DebugComponent
       i.label = label
       i
     end
+    dc.on = opts[:on] || true
     dc
   end
 

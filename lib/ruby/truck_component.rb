@@ -3,9 +3,10 @@ class TruckComponent
   extend MathUtils
   attr_accessor :truck_body, :wheel1, :wheel2, :motor1, :motor2, :truck_body_rend, :wheel1_rend, :wheel2_rend
 
-  def self.create(world)
-    truck_body_x = 10
-    truck_body_y = 6
+  def self.create(opts={})
+    world = opts[:world] || raise("Supply :world")
+    truck_body_x = opts[:x] || 10
+    truck_body_y = opts[:y] || 6
     body_def = BodyDef.new
     body_def.type = BodyDef::BodyType::DynamicBody  
     body_def.position.set(truck_body_x, truck_body_y)
