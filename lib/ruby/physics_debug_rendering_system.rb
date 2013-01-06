@@ -6,8 +6,8 @@ class PhysicsDebugRenderingSystem
     entities = entity_manager.get_all_entities_with_component_of_type(MainViewport)
     entities.each do |e|
       main_viewport = entity_manager.get_component_of_type(e, MainViewport)
-      physics_components.each do |physics_component|
-        if main_viewport.do_physics_debug_render
+      if main_viewport.do_physics_debug_render
+        physics_components.each do |physics_component|
           physics_component.debug_renderer.render(physics_component.world, main_viewport.camera.combined) 
         end
       end
