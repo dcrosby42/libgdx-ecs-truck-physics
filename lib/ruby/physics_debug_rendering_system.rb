@@ -1,6 +1,5 @@
 
 class PhysicsDebugRenderingSystem
-  # def tick(delta, physics_component, main_viewport)
   def tick(delta, entity_manager)
     physics_components = entity_manager.get_all_components_of_type(PhysicsComponent)
     entities = entity_manager.get_all_entities_with_component_of_type(MainViewport)

@@ -8,15 +8,17 @@ class MainViewportSystem
     entities.each do |e|
       mv = entity_manager.get_component_of_type(e, MainViewport)
 
-      if input_processor.key_down?(Input::Keys::W)
+      if input_processor.key_down?(Input::Keys::NUM_8)
         mv.zoom_factor += 1
       end
-      if input_processor.key_down?(Input::Keys::S)
+      if input_processor.key_down?(Input::Keys::NUM_7)
         mv.zoom_factor -= 1
       end
       mv.zoom_factor = 2 if mv.zoom_factor < 2
       mv.zoom_factor = 100 if mv.zoom_factor > 100
-      if input_processor.key_down?(Input::Keys::LEFT) or input_processor.key_down?(Input::Keys::RIGHT)
+
+      # FIXME direct duplicate knowledge of player controls !!! :(
+      if input_processor.key_down?(Input::Keys::LEFT) or input_processor.key_down?(Input::Keys::RIGHT) or input_processor.key_down?(Input::Keys::A) or input_processor.key_down?(Input::Keys::D) 
         mv.manual_camera = false
       end
 
@@ -32,11 +34,11 @@ class MainViewportSystem
       
       # Keyboard control of camera:
       pan_amt = 0.2
-      if input_processor.key_down?(Input::Keys::A)
+      if input_processor.key_down?(Input::Keys::NUM_9)
         mv.look_at.x -= pan_amt
         mv.manual_camera = true
       end
-      if input_processor.key_down?(Input::Keys::D)
+      if input_processor.key_down?(Input::Keys::NUM_0)
         mv.look_at.x += pan_amt
         mv.manual_camera = true
       end

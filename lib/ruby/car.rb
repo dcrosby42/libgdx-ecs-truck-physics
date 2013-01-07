@@ -22,6 +22,10 @@ class Car
     @entity_manager.add_component level, physics_component
     @entity_manager.add_component level, GroundComponent.create(physics_component.world)
     @entity_manager.add_component level, @input_processor # FIXME???
+    main_viewport = MainViewport.create(game_width: $game_width, game_height: $game_height, 
+                                        do_physics_debug_render: true,
+                                        do_renderable_renders: true)
+    @entity_manager.add_component level, main_viewport
     hud_viewport = HudViewport.create(game_width: $game_width, game_height: $game_height)
     @entity_manager.add_component level, hud_viewport
     @entity_manager.add_component level, @stats_component
@@ -30,32 +34,55 @@ class Car
       [ StatsComponent, ->(c){c.time_per_loop}, "Time-per-loop" ],
       [ StatsComponent, ->(c){c.utilization}, "Render load" ],
     ])
-
-    main_viewport = MainViewport.create(game_width: $game_width, game_height: $game_height, 
-                                        do_physics_debug_render: true,
-                                        do_renderable_renders: true)
-
+  
+    # Player 1 Truck
     truck_component = TruckComponent.create(world: physics_component.world)
-    main_viewport.follow_body = truck_component.truck_body # FIXME
-
     player1 = @entity_manager.create_tagged_entity('player1')
-    @entity_manager.add_component player1, main_viewport
     @entity_manager.add_component player1, truck_component
-    @entity_manager.add_component player1, DebugComponent.create([
-      [ TruckComponent, ->(c){c.wheel2.angle}, "Wheel2 angle" ],
-      [ TruckComponent, ->(c){c.wheel1.angle}, "Wheel1 angle" ],
+    @entity_manager.add_component player1, PlayerControlComponent.create({
+      :left  => [ :hold,  Input::Keys::A ],
+      :right => [ :hold,  Input::Keys::D ], 
+      :jump  => [ :press, Input::Keys::W ], 
+      :boost => [ :hold,  Input::Keys::CONTROL_LEFT ],
+    })
+    # @entity_manager.add_component player1, DebugComponent.create([
+    #   [ TruckComponent, ->(c){c.wheel2.angle}, "Wheel2 angle" ],
+    #   [ TruckComponent, ->(c){c.wheel1.angle}, "Wheel1 angle" ],
+    # ])
+
+    # Player 2 Truck
+    truck_component2 = TruckComponent.create(world: physics_component.world, x: 15)
+    player2 = @entity_manager.create_tagged_entity('player2')
+    @entity_manager.add_component player2, truck_component2
+    @entity_manager.add_component player2, PlayerControlComponent.create({
+      :left  => [ :hold,  Input::Keys::LEFT ],
+      :right => [ :hold,  Input::Keys::RIGHT ], 
+      :jump  => [ :press, Input::Keys::UP ], 
+      :boost => [ :hold,  Input::Keys::SHIFT_RIGHT ],
+    })
+    @entity_manager.add_component player2, DebugComponent.create([
+      # [ TruckComponent, ->(c){c.wheel2.angle}, "Wheel2 angle" ],
+      # [ TruckComponent, ->(c){c.wheel1.angle}, "Wheel1 angle" ],
+      [ PlayerControlComponent, ->(c){c.left}, "P2 left?" ],
+      [ PlayerControlComponent, ->(c){c.right}, "P2 right?" ],
+      [ PlayerControlComponent, ->(c){c.jump}, "P2 jump?" ],
+      [ PlayerControlComponent, ->(c){c.boost}, "P2 boost?" ],
     ])
+
+
+    main_viewport.follow_body = truck_component.truck_body # FIXME Use "player1" or "player2" and update in main_viewport_system
 
     #
     # SYSTEMS: 
     #
     
+
     @physics_system = PhysicsSystem.new
     @truck_system = TruckSystem.new
+    @player_control_system = PlayerControlSystem.new
     @body_renderable_system = BodyRenderableSystem.new
     @main_viewport_system = MainViewportSystem.new
     @hud_viewport_system = HudViewportSystem.new
-    
     @main_rendering_system = MainRenderingSystem.new
     @physics_debug_rendering_system = PhysicsDebugRenderingSystem.new
     @hud_rendering_system = HudRenderingSystem.new
@@ -74,9 +101,10 @@ class Car
     Gdx.app.exit if @input_processor.key_pressed?(Input::Keys::ESCAPE)
     return if @broke
 
-    #
-    # UPDATING
-    #
+    Gdx.gl.glClear(GL10::GL_COLOR_BUFFER_BIT);  
+
+
+    @player_control_system.tick delta, @entity_manager
 
     @truck_system.tick delta, @entity_manager 
     
@@ -98,15 +126,15 @@ class Car
     # RENDERING
     #
 
-    Gdx.gl.glClear(GL10::GL_COLOR_BUFFER_BIT);  
 
     @main_rendering_system.tick delta, @entity_manager
 
     @physics_debug_rendering_system.tick delta, @entity_manager
 
     @hud_rendering_system.tick delta, @entity_manager
+    
+  
 
-    # sleep 0.02
     render_end_time = Time.now
     @stats_component.time_per_loop = render_end_time - render_start_time
   rescue Exception => e
@@ -140,6 +168,8 @@ class Car
       hud_viewport
       truck_component
       truck_system
+      player_control_component
+      player_control_system
       renderable
       body_renderable_system
       main_rendering_system

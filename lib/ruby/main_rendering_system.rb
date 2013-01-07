@@ -11,39 +11,37 @@ class MainRenderingSystem
   def tick(delta, entity_manager)
     level = entity_manager.get_all_entities_with_tag('level').first || raise("Need entity tagged 'level'")
     ground_component = entity_manager.get_component_of_type(level, GroundComponent)
+    main_viewport    = entity_manager.get_component_of_type(level, MainViewport)
 
-    players = entity_manager.get_all_entities_with_components_of_type([MainViewport, TruckComponent])
-    players.each do |player|
-      main_viewport = entity_manager.get_component_of_type(player, MainViewport)
+    return unless main_viewport.do_renderable_renders
+
+    batch = main_viewport.sprite_batch
+    batch.setProjectionMatrix(main_viewport.camera.combined)
+    batch.begin
+
+    # Players' vehicles
+    entities = entity_manager.get_all_entities_with_component_of_type(TruckComponent)
+    entities.each do |player|
       truck_component = entity_manager.get_component_of_type(player, TruckComponent)
-
-      if main_viewport.do_renderable_renders
-        # Truck and stones etc:
-        renderables = [
-          truck_component.wheel1_rend,
-          truck_component.wheel2_rend,
-          truck_component.truck_body_rend,
-        ] + ground_component.rend_body_pairs.map do |x| x.first end
-
-        
-        batch = main_viewport.sprite_batch
-        batch.setProjectionMatrix(main_viewport.camera.combined)
-        batch.begin
-        renderables.each do |r|
-          draw_renderable batch, r
-        end
-        batch.end
-
-        # Ground contour:
-        
+      draw_renderable batch, truck_component.wheel1_rend
+      draw_renderable batch, truck_component.wheel2_rend
+      draw_renderable batch, truck_component.truck_body_rend
+    end
+    
+    # Ground debris
+    ground_component.rend_body_pairs.each do |(renderable,body)| 
+      draw_renderable batch, renderable
+    end
+      
+    # Ground contour
       # Drawing shapes using GL utils:
       # @shape_renderer.setProjectionMatrix(@camera.combined)
       # @shape_renderer.begin(ShapeRenderer::ShapeType::Line)
       # @shape_renderer.setColor(1, 0, 0, 1);
       # @shape_renderer.line(0,0, 20,20);
       # @shape_renderer.end
-      end
-    end
+    
+    batch.end
   end
 
   private
