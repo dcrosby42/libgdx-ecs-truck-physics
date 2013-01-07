@@ -2,48 +2,56 @@
 class MainViewportSystem
   def tick(delta, entity_manager)
     level = entity_manager.get_all_entities_with_tag("level").first || raise("Can't find the 'level' entity!")
-    input_processor = entity_manager.get_component_of_type(level, MyInputProcessor)
-    mv = entity_manager.get_component_of_type(level, MainViewport)
+    mv = entity_manager.get_component_of_type(level, MainViewport) || raise("No MainViewPort")
+    control = entity_manager.get_component_of_type(level, ControlComponent) || raise("No ControlComponent")
 
-    if input_processor.key_down?(Input::Keys::NUM_8)
-      mv.zoom_factor += 1
-    end
-    if input_processor.key_down?(Input::Keys::NUM_7)
+    if control.zoom_out
       mv.zoom_factor -= 1
+    end
+    if control.zoom_in
+      mv.zoom_factor += 1
     end
     mv.zoom_factor = 2 if mv.zoom_factor < 2
     mv.zoom_factor = 100 if mv.zoom_factor > 100
 
-    # FIXME direct duplicate knowledge of player controls !!! :(
-    if input_processor.key_down?(Input::Keys::LEFT) or input_processor.key_down?(Input::Keys::RIGHT) or input_processor.key_down?(Input::Keys::A) or input_processor.key_down?(Input::Keys::D) 
-      mv.manual_camera = false
-    end
 
     mv.camera.viewportWidth = mv.game_width * 1.0 / mv.zoom_factor
     mv.camera.viewportHeight = mv.game_height * 1.0 / mv.zoom_factor
 
-    if input_processor.key_pressed?(Input::Keys::F1)
+    if control.toggle_draw_physics
       mv.do_physics_debug_render = !mv.do_physics_debug_render
     end
-    if input_processor.key_pressed?(Input::Keys::F2)
+    if control.toggle_draw_renderables
       mv.do_renderable_renders = !mv.do_renderable_renders
     end
     
-    # Keyboard control of camera:
-    pan_amt = 0.2
-    if input_processor.key_down?(Input::Keys::NUM_9)
-      mv.look_at.x -= pan_amt
-      mv.manual_camera = true
-    end
-    if input_processor.key_down?(Input::Keys::NUM_0)
-      mv.look_at.x += pan_amt
-      mv.manual_camera = true
+    if control.toggle_follow_player
+      mv.follow_player = case mv.follow_player
+                         when nil
+                           'player1'
+                         when 'player1'
+                           'player2'
+                         else
+                           nil
+                         end
     end
 
     # Camera follows vehicle
-    if !mv.manual_camera and !mv.follow_body.nil?
-      mv.look_at.x = mv.follow_body.position.x
-      mv.look_at.y = mv.follow_body.position.y + 4
+    if mv.follow_player 
+      entity = entity_manager.get_all_entities_with_tag(mv.follow_player).first || raise("Couldn't find entity tagged '#{mv.follow_player}'")
+      truck_component = entity_manager.get_component_of_type(entity, TruckComponent) || raise("Entity '#{mv.follow_player}' doesn't have a TruckComponent")
+      body = truck_component.truck_body
+
+      mv.look_at.x = body.position.x
+      mv.look_at.y = body.position.y + 4
+    else
+      pan_amt = 0.2
+      if control.pan_left
+        mv.look_at.x -= pan_amt
+      end
+      if control.pan_right
+        mv.look_at.x += pan_amt
+      end
     end
 
     mv.camera.position.set(mv.look_at.x, mv.look_at.y, 0)

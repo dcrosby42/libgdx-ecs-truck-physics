@@ -1,9 +1,9 @@
-class PlayerControlSystem
+class ControlSystem
   def tick(delta, entity_manager)
     level = entity_manager.get_all_entities_with_tag("level").first || raise("Can't find the 'level' entity!")
     input_processor = entity_manager.get_component_of_type(level, MyInputProcessor)
     
-    entity_manager.get_all_components_of_type(PlayerControlComponent).each do |control|
+    entity_manager.get_all_components_of_type(ControlComponent).each do |control|
       control.attr_key_mapping.each do |(attr, key_def)|
         gesture,key = key_def
         # p key_def

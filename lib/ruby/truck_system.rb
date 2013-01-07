@@ -5,10 +5,10 @@ class TruckSystem
     # level = entity_manager.get_all_entities_with_tag("level").first || raise("Can't find the 'level' entity!")
     # input_processor = entity_manager.get_component_of_type(level, MyInputProcessor)
 
-    entities = entity_manager.get_all_entities_with_components_of_type([TruckComponent, PlayerControlComponent])
+    entities = entity_manager.get_all_entities_with_components_of_type([TruckComponent, ControlComponent])
     entities.each do |e|
       truck_component = entity_manager.get_component_of_type(e, TruckComponent)
-      control = entity_manager.get_component_of_type(e, PlayerControlComponent)
+      control = entity_manager.get_component_of_type(e, ControlComponent)
 
       power = 0
       # if input_processor.key_down?(Input::Keys::LEFT)

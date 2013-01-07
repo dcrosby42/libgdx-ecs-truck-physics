@@ -24,22 +24,35 @@ class Car
     @entity_manager.add_component level, @input_processor # FIXME???
     main_viewport = MainViewport.create(game_width: $game_width, game_height: $game_height, 
                                         do_physics_debug_render: true,
-                                        do_renderable_renders: true)
+                                        do_renderable_renders: true,
+                                        follow_player: 'player1'
+                                        )
     @entity_manager.add_component level, main_viewport
+    @entity_manager.add_component level, ControlComponent.create({
+      :zoom_out   => [ :hold,  Input::Keys::MINUS ],
+      :zoom_in    => [ :hold,  Input::Keys::EQUALS ],
+      :pan_left   => [ :hold,  Input::Keys::NUM_9 ],
+      :pan_right  => [ :hold,  Input::Keys::NUM_0 ],
+      :toggle_draw_physics      => [ :press,  Input::Keys::F1 ],
+      :toggle_draw_renderables  => [ :press,  Input::Keys::F2 ],
+      :toggle_follow_player     => [ :press,  Input::Keys::F4 ],
+    })
     hud_viewport = HudViewport.create(game_width: $game_width, game_height: $game_height)
     @entity_manager.add_component level, hud_viewport
     @entity_manager.add_component level, @stats_component
     @entity_manager.add_component level, DebugComponent.create([
       [ StatsComponent, ->(c){c.fps}, "FPS" ],
-      [ StatsComponent, ->(c){c.time_per_loop}, "Time-per-loop" ],
+      # [ StatsComponent, ->(c){c.time_per_loop}, "Time-per-loop" ],
       [ StatsComponent, ->(c){c.utilization}, "Render load" ],
+      [ MainViewport, ->(c){c.zoom_factor}, "Zoom" ],
+      [ MainViewport, ->(c){c.follow_player}, "Following" ],
     ])
-  
+
     # Player 1 Truck
     truck_component = TruckComponent.create(world: physics_component.world)
     player1 = @entity_manager.create_tagged_entity('player1')
     @entity_manager.add_component player1, truck_component
-    @entity_manager.add_component player1, PlayerControlComponent.create({
+    @entity_manager.add_component player1, ControlComponent.create({
       :left  => [ :hold,  Input::Keys::A ],
       :right => [ :hold,  Input::Keys::D ], 
       :jump  => [ :press, Input::Keys::W ], 
@@ -54,7 +67,7 @@ class Car
     truck_component2 = TruckComponent.create(world: physics_component.world, x: 15)
     player2 = @entity_manager.create_tagged_entity('player2')
     @entity_manager.add_component player2, truck_component2
-    @entity_manager.add_component player2, PlayerControlComponent.create({
+    @entity_manager.add_component player2, ControlComponent.create({
       :left  => [ :hold,  Input::Keys::LEFT ],
       :right => [ :hold,  Input::Keys::RIGHT ], 
       :jump  => [ :press, Input::Keys::UP ], 
@@ -63,14 +76,13 @@ class Car
     @entity_manager.add_component player2, DebugComponent.create([
       # [ TruckComponent, ->(c){c.wheel2.angle}, "Wheel2 angle" ],
       # [ TruckComponent, ->(c){c.wheel1.angle}, "Wheel1 angle" ],
-      [ PlayerControlComponent, ->(c){c.left}, "P2 left?" ],
-      [ PlayerControlComponent, ->(c){c.right}, "P2 right?" ],
-      [ PlayerControlComponent, ->(c){c.jump}, "P2 jump?" ],
-      [ PlayerControlComponent, ->(c){c.boost}, "P2 boost?" ],
+      # [ ControlComponent, ->(c){c.left}, "P2 left?" ],
+      # [ ControlComponent, ->(c){c.right}, "P2 right?" ],
+      # [ ControlComponent, ->(c){c.jump}, "P2 jump?" ],
+      # [ ControlComponent, ->(c){c.boost}, "P2 boost?" ],
     ])
 
 
-    main_viewport.follow_body = truck_component.truck_body # FIXME Use "player1" or "player2" and update in main_viewport_system
 
     #
     # SYSTEMS: 
@@ -79,7 +91,7 @@ class Car
 
     @physics_system = PhysicsSystem.new
     @truck_system = TruckSystem.new
-    @player_control_system = PlayerControlSystem.new
+    @control_system = ControlSystem.new
     @body_renderable_system = BodyRenderableSystem.new
     @main_viewport_system = MainViewportSystem.new
     @hud_viewport_system = HudViewportSystem.new
@@ -104,7 +116,7 @@ class Car
     Gdx.gl.glClear(GL10::GL_COLOR_BUFFER_BIT);  
 
 
-    @player_control_system.tick delta, @entity_manager
+    @control_system.tick delta, @entity_manager
 
     @truck_system.tick delta, @entity_manager 
     
@@ -168,8 +180,8 @@ class Car
       hud_viewport
       truck_component
       truck_system
-      player_control_component
-      player_control_system
+      control_component
+      control_system
       renderable
       body_renderable_system
       main_rendering_system
