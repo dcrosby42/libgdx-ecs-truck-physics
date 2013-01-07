@@ -11,9 +11,8 @@ class MainViewport
   def self.create(opts={})
     mv = MainViewport.new
     mv.camera = OrthographicCamera.new
-    mv.zoom_factor = 35
+    mv.zoom_factor = opts[:zoom_factor] || 35
     mv.look_at = vec2(0,0)
-    mv.manual_camera = false
     mv.sprite_batch = SpriteBatch.new
     mv.game_width = opts[:game_width] || raise(":game_width required")
     mv.game_height = opts[:game_height] || raise(":game_height required")

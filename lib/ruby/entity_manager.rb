@@ -148,7 +148,7 @@ class EntityManager
   def get_all_components_of_type(component_class)
     store = @component_stores[component_class]
     all_comps = []
-    store.each do |entity,comps|
+    (store || []).each do |entity,comps|
       all_comps += comps
     end
     all_comps

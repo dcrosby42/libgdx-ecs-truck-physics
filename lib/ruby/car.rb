@@ -21,13 +21,12 @@ class Car
     level = @entity_manager.create_tagged_entity('level')
     @entity_manager.add_component level, physics_component
     @entity_manager.add_component level, GroundComponent.create(physics_component.world)
-    @entity_manager.add_component level, @input_processor # FIXME???
-    main_viewport = MainViewport.create(game_width: $game_width, game_height: $game_height, 
-                                        do_physics_debug_render: true,
-                                        do_renderable_renders: true,
-                                        follow_player: 'player1'
-                                        )
-    @entity_manager.add_component level, main_viewport
+    @entity_manager.add_component level, @input_processor 
+    @entity_manager.add_component level, MainViewport.create(game_width: $game_width, game_height: $game_height, 
+                                                             do_physics_debug_render: true,
+                                                             do_renderable_renders: true,
+                                                             zoom_factor: 20,
+                                                             follow_player: 'player1')
     @entity_manager.add_component level, ControlComponent.create({
       :zoom_out   => [ :hold,  Input::Keys::MINUS ],
       :zoom_in    => [ :hold,  Input::Keys::EQUALS ],
@@ -44,7 +43,7 @@ class Car
       [ StatsComponent, ->(c){c.fps}, "FPS" ],
       # [ StatsComponent, ->(c){c.time_per_loop}, "Time-per-loop" ],
       [ StatsComponent, ->(c){c.utilization}, "Render load" ],
-      [ MainViewport, ->(c){c.zoom_factor}, "Zoom" ],
+      # [ MainViewport, ->(c){c.zoom_factor}, "Zoom" ],
       [ MainViewport, ->(c){c.follow_player}, "Following" ],
     ])
 
@@ -87,19 +86,34 @@ class Car
     #
     # SYSTEMS: 
     #
-    
 
-    @physics_system = PhysicsSystem.new
-    @truck_system = TruckSystem.new
-    @control_system = ControlSystem.new
-    @body_renderable_system = BodyRenderableSystem.new
-    @main_viewport_system = MainViewportSystem.new
-    @hud_viewport_system = HudViewportSystem.new
-    @main_rendering_system = MainRenderingSystem.new
-    @physics_debug_rendering_system = PhysicsDebugRenderingSystem.new
-    @hud_rendering_system = HudRenderingSystem.new
-    @debug_system = DebugSystem.new
-    @stats_system = StatsSystem.new
+    # @physics_system = PhysicsSystem.new
+    # @truck_system = TruckSystem.new
+    # @control_system = ControlSystem.new
+    # @body_renderable_system = BodyRenderableSystem.new
+    # @main_viewport_system = MainViewportSystem.new
+    # @hud_viewport_system = HudViewportSystem.new
+    # @main_rendering_system = MainRenderingSystem.new
+    # @physics_debug_rendering_system = PhysicsDebugRenderingSystem.new
+    # @hud_rendering_system = HudRenderingSystem.new
+    # @debug_system = DebugSystem.new
+    # @stats_system = StatsSystem.new
+
+    @systems = [
+      # Updating:
+      ControlSystem.new,
+      TruckSystem.new,
+      PhysicsSystem.new,
+      MainViewportSystem.new,
+      StatsSystem.new,
+      DebugSystem.new,
+      HudViewportSystem.new,
+      BodyRenderableSystem.new,
+      # Rendering:
+      MainRenderingSystem.new,
+      PhysicsDebugRenderingSystem.new,
+      HudRenderingSystem.new,
+    ]
 
   rescue Exception => e
     debug_exception e
@@ -115,38 +129,11 @@ class Car
 
     Gdx.gl.glClear(GL10::GL_COLOR_BUFFER_BIT);  
 
-
-    @control_system.tick delta, @entity_manager
-
-    @truck_system.tick delta, @entity_manager 
-    
-    @physics_system.tick delta, @entity_manager 
-
-    @main_viewport_system.tick delta, @entity_manager 
-    
-    @stats_system.tick delta, @entity_manager 
-
-    @debug_system.tick delta, @entity_manager 
-    
-    @hud_viewport_system.tick delta, @entity_manager 
-
-    @body_renderable_system.tick delta, @entity_manager 
-
-    @input_processor.clear
-
-    #
-    # RENDERING
-    #
-
-
-    @main_rendering_system.tick delta, @entity_manager
-
-    @physics_debug_rendering_system.tick delta, @entity_manager
-
-    @hud_rendering_system.tick delta, @entity_manager
-    
+    @systems.each do |system|
+      system.tick delta, @entity_manager
+    end
   
-
+    @input_processor.clear
     render_end_time = Time.now
     @stats_component.time_per_loop = render_end_time - render_start_time
   rescue Exception => e

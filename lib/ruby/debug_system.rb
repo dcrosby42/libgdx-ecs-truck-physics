@@ -15,7 +15,8 @@ class DebugSystem
         dc.debug_items.each do |item|
           comp = nil
           comp = entity_manager.get_component_of_type(e, item.type) if item.type
-          value = item.func.call(comp) if item.func
+          value = item.func.call(comp) if comp and item.func
+          value = "-" if value.nil?
           hv.debug_lines << "#{item.label}: #{value}"
         end
       end
