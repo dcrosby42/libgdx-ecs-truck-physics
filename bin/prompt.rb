@@ -3,8 +3,8 @@ require File.expand_path(File.dirname(__FILE__) + "/../lib/ruby/environment")
 require 'math_utils'
 require 'title_screen'
 
-$game_width = 1024
-$game_height = 720
+$game_width = 800
+$game_height = 600
 
 $cfg = LwjglApplicationConfiguration.new
 $cfg.title = "Truck 2"
