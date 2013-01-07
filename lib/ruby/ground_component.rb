@@ -1,6 +1,6 @@
 class GroundComponent
   extend MathUtils
-  attr_accessor :ground, :stones, :rend_body_pairs
+  attr_accessor :ground, :stones, :rend_body_pairs, :ground_contour_points
 
   def self.create(world)
 
@@ -39,7 +39,7 @@ class GroundComponent
     # ground.reset_mass_data
 
     ground2_def = BodyDef.new
-    ground2_def.position.set(0,1)
+    ground2_def.position.set(0,0)
     ground2 = world.createBody(ground2_def)
 
     data = (-50..100).step(1.0).to_a.map do |x|
@@ -83,6 +83,7 @@ class GroundComponent
     gc.ground = ground2
     gc.stones = []
     gc.rend_body_pairs = []
+    gc.ground_contour_points = data
     
     # STONES: 
     

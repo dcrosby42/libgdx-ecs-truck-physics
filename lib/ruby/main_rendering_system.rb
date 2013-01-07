@@ -8,14 +8,27 @@ class MainRenderingSystem
     # ])
   
   # def tick(delta, main_viewport, renderables)
+  TOP_SKY_COLOR = Color.new(0.7, 0.7, 1.0, 1.0)
+  BOTTOM_SKY_COLOR = Color.new(0.0, 0.0, 0.4, 1.0)
+
   def tick(delta, entity_manager)
     level = entity_manager.get_all_entities_with_tag('level').first || raise("Need entity tagged 'level'")
     ground_component = entity_manager.get_component_of_type(level, GroundComponent)
     main_viewport    = entity_manager.get_component_of_type(level, MainViewport)
+    hud_viewport    = entity_manager.get_component_of_type(level, HudViewport)
 
     return unless main_viewport.do_renderable_renders
 
     batch = main_viewport.sprite_batch
+    sr = main_viewport.shape_renderer
+    # Sky
+    sr.begin(ShapeRenderer::ShapeType::FilledRectangle)
+      sr.setProjectionMatrix(hud_viewport.camera.combined)
+      # sr.setColor(0.3, 0.3, 0.4, 1);
+      sr.filledRect(0,0, $game_width, $game_height, 
+                   BOTTOM_SKY_COLOR, BOTTOM_SKY_COLOR, TOP_SKY_COLOR, TOP_SKY_COLOR)
+    sr.end
+
     batch.setProjectionMatrix(main_viewport.camera.combined)
     batch.begin
 
@@ -32,16 +45,35 @@ class MainRenderingSystem
     ground_component.rend_body_pairs.each do |(renderable,body)| 
       draw_renderable batch, renderable
     end
+    batch.end
       
     # Ground contour
-      # Drawing shapes using GL utils:
-      # @shape_renderer.setProjectionMatrix(@camera.combined)
-      # @shape_renderer.begin(ShapeRenderer::ShapeType::Line)
-      # @shape_renderer.setColor(1, 0, 0, 1);
-      # @shape_renderer.line(0,0, 20,20);
-      # @shape_renderer.end
+
+    sr.setProjectionMatrix(main_viewport.camera.combined)
+    # sr.begin(ShapeRenderer::ShapeType::Line)
+    sr.begin(ShapeRenderer::ShapeType::FilledTriangle)
+    sr.setColor(0.1, 0.5, 0.1, 1);
+    ground_component.ground_contour_points.each_cons(2) do |(x1,y1), (x2,y2)|
+      if y1 > y2
+        sr.filledTriangle(x1,y2,  x2,y2,  x1,y1)
+      else
+        sr.filledTriangle(x1,y1,  x2,y1,  x2,y2)
+      end
+    end
+    sr.end
+
+    sr.begin(ShapeRenderer::ShapeType::FilledRectangle)
+    # sr.setColor(1, 0, 0, 1);
+    bottom = -100
+    ground_component.ground_contour_points.each_cons(2) do |(x1,y1), (x2,y2)|
+      height = y1 - bottom
+      if y1 > y2 # downhill going right
+        height = y2 - bottom
+      end
+      sr.filledRect(x1,bottom, x2-x1, height)
+    end
+    sr.end
     
-    batch.end
   end
 
   private

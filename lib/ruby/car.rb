@@ -23,7 +23,7 @@ class Car
     @entity_manager.add_component level, GroundComponent.create(physics_component.world)
     @entity_manager.add_component level, @input_processor 
     @entity_manager.add_component level, MainViewport.create(game_width: $game_width, game_height: $game_height, 
-                                                             do_physics_debug_render: true,
+                                                             do_physics_debug_render: false,
                                                              do_renderable_renders: true,
                                                              zoom_factor: 20,
                                                              follow_player: 'player1')

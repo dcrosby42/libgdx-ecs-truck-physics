@@ -24,8 +24,8 @@ end
 
 Thread.abort_on_exception = true
 
-$game_width = 1024
-$game_height = 720
+$game_width = 1200
+$game_height = 1000
 
 $cfg = LwjglApplicationConfiguration.new
 $cfg.title = "Truck 2"
