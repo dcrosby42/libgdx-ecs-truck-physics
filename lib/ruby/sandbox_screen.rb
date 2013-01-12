@@ -1,5 +1,5 @@
 
-class Car
+class SandboxScreen
   include Screen
 
   def show
@@ -123,7 +123,7 @@ class Car
   def render(delta)
     render_start_time = Time.now
     # Level / reload control:
-    reload_car if @input_processor.key_pressed?(Input::Keys::BACKSLASH)
+    reload_sandbox_screen if @input_processor.key_pressed?(Input::Keys::BACKSLASH)
     Gdx.app.exit if @input_processor.key_pressed?(Input::Keys::ESCAPE)
     return if @broke
 

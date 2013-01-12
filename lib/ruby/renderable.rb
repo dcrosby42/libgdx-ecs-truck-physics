@@ -28,10 +28,10 @@ class Renderable
     r.scale_x = 1.0
     r.scale_y = 1.0
     r.angle_degrees = 0
-    r.source_x = 0
-    r.source_y = 0
-    r.source_width = r.texture.width
-    r.source_height = r.texture.height
+    r.source_x = opts[:source_x] || 0
+    r.source_y = opts[:source_y] || 0
+    r.source_width = opts[:source_width] || r.texture.width
+    r.source_height = opts[:source_height] || r.texture.height
     r.flip_x = false
     r.flip_y = false
     r

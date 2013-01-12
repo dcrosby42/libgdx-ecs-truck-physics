@@ -41,15 +41,15 @@ def lookup_source(name)
   end
 end
 
-def reload_car
-  puts "Reload Car! @ #{Time.now}"
+def reload_sandbox_screen
+  puts "Reload SandboxScreen! @ #{Time.now}"
   $app.post_runnable do
     begin
-      load_source("car")
-      Car.source_dependencies.each do |dep|
+      load_source("sandbox_screen")
+      SandboxScreen.source_dependencies.each do |dep|
         load_source(dep)
       end
-      $screen = Car.new
+      $screen = SandboxScreen.new
       $game.set_screen $screen
     rescue Exception => e
       debug_exception e
@@ -73,7 +73,7 @@ require 'file_watcher'
 $watcher = FileWatcher.new
 $watcher.on_file_changed do |fname|
   puts "Change to #{fname}"
-  reload_car
+  reload_sandbox_screen
 end
 $watcher.run
 
@@ -82,7 +82,7 @@ $watcher.run
 $game = MyGame.new
 $app = LwjglApplication.new($game, $cfg)
 
-reload_car
+reload_sandbox_screen
 
 def get_truck
   $screen.instance_variable_get(:@entity_manager).get_all_components_of_type(TruckComponent).first

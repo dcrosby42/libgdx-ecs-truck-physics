@@ -17,8 +17,8 @@ def load_texture(img_name)
 end
 # libgdx_practice/images/stone1.png
 
-require 'car'
-Car.source_dependencies.each do |name|
+require 'sandbox_screen'
+SandboxScreen.source_dependencies.each do |name|
   require name
 end
 
@@ -54,13 +54,13 @@ $app = LwjglApplication.new($game, $cfg)
 # require 'pry'
 # binding.pry
 
-def reload_car
+def reload_sandbox_screen
   $app.post_runnable do
-    $game.setScreen Car.new
+    $game.setScreen SandboxSceen.new
   end
 end
 
-reload_car
+reload_sandbox_screen
 
 puts "SLEEPING IN bin/main.rb"
 sleep 
