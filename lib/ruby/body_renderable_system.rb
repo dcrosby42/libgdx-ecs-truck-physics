@@ -6,10 +6,12 @@ class BodyRenderableSystem
 
     # FIXME this is all stupid
     
+    # Ground / debris:
     level = entity_manager.get_all_entities_with_tag('level').first || raise("Need entity tagged 'level'")
     ground_component = entity_manager.get_component_of_type(level, GroundComponent)
     rend_body_pairs += ground_component.rend_body_pairs
 
+    # Trucks:
     entities = entity_manager.get_all_entities_with_component_of_type(TruckComponent)
     entities.each do |e|
       truck_component = entity_manager.get_component_of_type(e,TruckComponent)
@@ -19,6 +21,15 @@ class BodyRenderableSystem
         [truck_component.truck_body_rend, truck_component.truck_body],
       ]
     end
+
+    # Minecraft blocks:
+    entities = entity_manager.get_all_entities_with_component_of_type(MinecraftBlock)
+    entities.each do |e|
+      mcb = entity_manager.get_component_of_type(e,MinecraftBlock)
+      # p mcb.body
+      rend_body_pairs += [[mcb.renderable, mcb.body]]
+    end
+  
 
     rend_body_pairs.each do |(r, body)|
       r.x = body.position.x - r.center_x

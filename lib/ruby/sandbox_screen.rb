@@ -15,15 +15,20 @@ class SandboxScreen
     # COMPONENTS: 
     #
 
+    # Physics:
     physics_component = PhysicsComponent.create(framerate: 60)
+
+    # Game perf stats:
     @stats_component = StatsComponent.create
     @stats_component.expected_framerate = 60
+    
+    # The "Level": 
     level = @entity_manager.create_tagged_entity('level')
     @entity_manager.add_component level, physics_component
     @entity_manager.add_component level, GroundComponent.create(physics_component.world)
     @entity_manager.add_component level, @input_processor 
     @entity_manager.add_component level, MainViewport.create(game_width: $game_width, game_height: $game_height, 
-                                                             do_physics_debug_render: false,
+                                                             do_physics_debug_render: true,
                                                              do_renderable_renders: true,
                                                              zoom_factor: 20,
                                                              follow_player: 'player1')
@@ -81,24 +86,17 @@ class SandboxScreen
       # [ ControlComponent, ->(c){c.boost}, "P2 boost?" ],
     ])
 
+    # Block
+    bouncer = @entity_manager.create_tagged_entity('the_block')
+    @entity_manager.add_component bouncer, MinecraftBlock.create(world: physics_component.world, x: 10)
+
 
 
     #
     # SYSTEMS: 
     #
 
-    # @physics_system = PhysicsSystem.new
-    # @truck_system = TruckSystem.new
-    # @control_system = ControlSystem.new
-    # @body_renderable_system = BodyRenderableSystem.new
-    # @main_viewport_system = MainViewportSystem.new
-    # @hud_viewport_system = HudViewportSystem.new
-    # @main_rendering_system = MainRenderingSystem.new
-    # @physics_debug_rendering_system = PhysicsDebugRenderingSystem.new
-    # @hud_rendering_system = HudRenderingSystem.new
-    # @debug_system = DebugSystem.new
-    # @stats_system = StatsSystem.new
-
+    # (ordering is significant)
     @systems = [
       # Updating:
       ControlSystem.new,
@@ -167,6 +165,7 @@ class SandboxScreen
       hud_viewport
       truck_component
       truck_system
+      minecraft_block
       control_component
       control_system
       renderable

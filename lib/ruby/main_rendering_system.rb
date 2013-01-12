@@ -40,6 +40,15 @@ class MainRenderingSystem
       draw_renderable batch, truck_component.wheel2_rend
       draw_renderable batch, truck_component.truck_body_rend
     end
+
+
+    entities = entity_manager.get_all_entities_with_component_of_type(MinecraftBlock)
+    entities.each do |e|
+      mcb = entity_manager.get_component_of_type(e, MinecraftBlock)
+      draw_renderable batch, mcb.renderable
+    end
+
+
     
     # Ground debris
     ground_component.rend_body_pairs.each do |(renderable,body)| 
