@@ -6,6 +6,18 @@ class MinecraftBlock
     body_x = opts[:x] || 10
     body_y = opts[:y] || 6
 
+    # tex fname
+    # tex scale: scale multiplier to size the image to the environment. 
+    # offset_x and offset_uy -- center of box, 0,0 means math center of the box (this is default)
+    # source x/y: where in the text to start taking from (lower left), measured in pixels in the image
+    # source w/h: how much of the source tex to use, reaching up and right from the lower left specified by source x/y, measured in pixels in the image
+    #
+    # box w/h
+    # friction
+    # density
+    # restitution
+    # groupIndex 
+
     body_def = BodyDef.new
     body_def.type = BodyDef::BodyType::DynamicBody  
     body_def.position.set(body_x, body_y)
@@ -13,22 +25,24 @@ class MinecraftBlock
 
     box_def = FixtureDef.new
     box_def.shape = PolygonShape.new
-    box_def.shape.set_as_box(0.5, 0.5)
-    box_def.friction = 0.5
-    box_def.density = 1
-    box_def.restitution = 0.2
-    box_def.filter.groupIndex = -1
+    box_def.shape.set_as_box(1.0, 1.0)
+    box_def.friction = 0.3
+    box_def.density = 0.5 
+    box_def.restitution = 0.1
+    # box_def.filter.groupIndex = -1
 
     body.createFixture(box_def)
 
     body.reset_mass_data
 
 
-    # 306,161   71x71
     tex = load_texture('minecraft_sheet.png')
+    r = 7
+    c = 7
     body_rend = Renderable.create(texture: tex, 
-                                  texture_scale: 0.022, 
-                                  offset_x: -0.15, offset_y: 0.75,
+                                  texture_scale: 0.008, 
+                                  offset_x: 0.0, offset_y: 0.0,
+                                  source_x: c*16, source_y: r*16,
                                   source_width: 16, source_height: 16,
                                  )
 

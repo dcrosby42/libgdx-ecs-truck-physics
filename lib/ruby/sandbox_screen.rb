@@ -88,7 +88,11 @@ class SandboxScreen
 
     # Block
     bouncer = @entity_manager.create_tagged_entity('the_block')
-    @entity_manager.add_component bouncer, MinecraftBlock.create(world: physics_component.world, x: 10)
+    @entity_manager.add_component bouncer, MinecraftBlock.create(world: physics_component.world, x: 5)
+    @entity_manager.add_component bouncer, ControlComponent.create({
+      :left => [:press, Input::Keys::T],
+      :right => [:press, Input::Keys::Y],
+    })
 
 
 
@@ -101,6 +105,7 @@ class SandboxScreen
       # Updating:
       ControlSystem.new,
       TruckSystem.new,
+      MinecraftBlockSystem.new,
       PhysicsSystem.new,
       MainViewportSystem.new,
       StatsSystem.new,
@@ -165,6 +170,7 @@ class SandboxScreen
       hud_viewport
       truck_component
       truck_system
+      minecraft_block_system
       minecraft_block
       control_component
       control_system
