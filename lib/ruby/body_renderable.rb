@@ -1,6 +1,6 @@
 
-class Renderable 
-  attr_accessor :texture,
+class BodyRenderable 
+  attr_accessor :body, :texture,
     :texture_scale,
     :center_x, :center_y,
     :offset_x, :offset_y,
@@ -14,7 +14,7 @@ class Renderable
     :flip_x, :flip_y
 
   def self.create(opts={})
-    r = Renderable.new
+    r = new
     r.texture = opts[:texture] || raise("Texture required")
     texture_scale = opts[:texture_scale] || 1.0
     r.width = texture_scale * r.texture.width
@@ -34,6 +34,8 @@ class Renderable
     r.source_height = opts[:source_height] || r.texture.height
     r.flip_x = false
     r.flip_y = false
+
+    r.body = opts[:body]
     r
   end
 end

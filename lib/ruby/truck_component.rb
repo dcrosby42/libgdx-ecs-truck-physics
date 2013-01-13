@@ -89,12 +89,12 @@ class TruckComponent
     # RENDERABLES
     # chassis = Texture.new(Gdx.files.internal(RELATIVE_ROOT + 'images/truck_chassis.png'))
     chassis = load_texture('truck_chassis.png')
-    truck_body_rend = Renderable.create(texture: chassis, texture_scale: 0.022, offset_x: -0.15, offset_y: 0.75)
+    truck_body_rend = BodyRenderable.create(texture: chassis, texture_scale: 0.022, offset_x: -0.15, offset_y: 0.75)
 
     # tire = Texture.new(Gdx.files.internal(RELATIVE_ROOT + 'images/truck_tire.png'))
     tire = load_texture('truck_tire.png')
-    wheel1_rend = Renderable.create(texture: tire, texture_scale: 0.022)
-    wheel2_rend = Renderable.create(texture: tire, texture_scale: 0.022)
+    wheel1_rend = BodyRenderable.create(texture: tire, texture_scale: 0.022)
+    wheel2_rend = BodyRenderable.create(texture: tire, texture_scale: 0.022)
 
     tc = TruckComponent.new
     tc.truck_body = truck_body

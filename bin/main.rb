@@ -21,6 +21,10 @@ require 'sandbox_screen'
 SandboxScreen.source_dependencies.each do |name|
   require name
 end
+require 'entity_builder'
+EntityBuilder.source_dependencies.each do |dep|
+  load_source(dep)
+end
 
 Thread.abort_on_exception = true
 

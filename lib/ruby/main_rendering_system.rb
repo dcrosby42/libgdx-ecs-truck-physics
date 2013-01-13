@@ -41,12 +41,19 @@ class MainRenderingSystem
       draw_renderable batch, truck_component.truck_body_rend
     end
 
-
-    entities = entity_manager.get_all_entities_with_component_of_type(MinecraftBlock)
-    entities.each do |e|
-      mcb = entity_manager.get_component_of_type(e, MinecraftBlock)
-      draw_renderable batch, mcb.renderable
+    # BodyRenderables....
+    entities = entity_manager.get_all_entities_with_component_of_type(BodyRenderable)
+    entities.each do |player|
+      br = entity_manager.get_component_of_type(player, BodyRenderable)
+      draw_renderable batch, br
     end
+
+    # Minecraft blocks
+    # entities = entity_manager.get_all_entities_with_component_of_type(MinecraftBlock)
+    # entities.each do |e|
+    #   mcb = entity_manager.get_component_of_type(e, MinecraftBlock)
+    #   draw_renderable batch, mcb.renderable
+    # end
 
 
     

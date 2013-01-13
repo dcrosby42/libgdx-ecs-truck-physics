@@ -105,7 +105,7 @@ class GroundComponent
       scaler = rand + 1
       circle_def.shape.radius = 0.2 * scaler
       body_def.position.set(rand * 35 +  5, 6)
-      stone1_rend = Renderable.create(texture: stone1, texture_scale: 0.010 * scaler)
+      stone1_rend = BodyRenderable.create(texture: stone1, texture_scale: 0.010 * scaler)
 
       body = world.create_body(body_def)
       body.create_fixture(circle_def)

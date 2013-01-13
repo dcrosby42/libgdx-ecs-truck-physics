@@ -145,6 +145,25 @@ class EntityManager
     return components.first
   end
 
+  # Croz added 
+  def get_components_of_type(entity_uuid, component_class)
+    raise ArgumentError, "UUID and component class must be specified" if entity_uuid.nil? || component_class.nil?
+
+    # return nil unless has_component_of_type(entity_uuid, component.class)
+    store = @component_stores[component_class]
+    return nil if store.nil?
+
+    components = store[entity_uuid]
+    return nil if components.nil? || components.empty?
+
+    # if components.size != 1
+    #   puts "Warning: you probably expected #{entity_uuid} to have just one #{component_class.to_s} but it had #{components.size}...returning first."
+    # end
+
+    return components
+  end
+
+  # Croz added 
   def get_all_components_of_type(component_class)
     store = @component_stores[component_class]
     all_comps = []

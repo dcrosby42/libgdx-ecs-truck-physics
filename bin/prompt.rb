@@ -49,6 +49,9 @@ def reload_sandbox_screen
       SandboxScreen.source_dependencies.each do |dep|
         load_source(dep)
       end
+      EntityBuilder.source_dependencies.each do |dep|
+        load_source(dep)
+      end
       $screen = SandboxScreen.new
       $game.set_screen $screen
     rescue Exception => e

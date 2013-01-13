@@ -2,6 +2,22 @@
 class BodyRenderableSystem
   include MathUtils
   def tick(delta, entity_manager)
+    OLD_tick delta, entity_manager
+
+    entities = entity_manager.get_all_entities_with_component_of_type(BodyRenderable)
+    entities.each do |e|
+      brends = entity_manager.get_components_of_type(e,BodyRenderable)
+      brends.each do |br|
+        body = br.body
+        br.x = body.position.x - br.center_x
+        br.y = body.position.y - br.center_y
+        br.angle_degrees = rad2deg(body.angle)
+      end
+    end
+
+  end
+
+  def OLD_tick(delta, entity_manager)
     rend_body_pairs = []
 
     # FIXME this is all stupid
@@ -23,12 +39,12 @@ class BodyRenderableSystem
     end
 
     # Minecraft blocks:
-    entities = entity_manager.get_all_entities_with_component_of_type(MinecraftBlock)
-    entities.each do |e|
-      mcb = entity_manager.get_component_of_type(e,MinecraftBlock)
-      # p mcb.body
-      rend_body_pairs += [[mcb.renderable, mcb.body]]
-    end
+    # entities = entity_manager.get_all_entities_with_component_of_type(MinecraftBlock)
+    # entities.each do |e|
+    #   mcb = entity_manager.get_component_of_type(e,MinecraftBlock)
+    #   # p mcb.body
+    #   rend_body_pairs += [[mcb.renderable, mcb.body]]
+    # end
   
 
     rend_body_pairs.each do |(r, body)|
@@ -36,5 +52,6 @@ class BodyRenderableSystem
       r.y = body.position.y - r.center_y
       r.angle_degrees = rad2deg(body.angle)
     end
+
   end
 end

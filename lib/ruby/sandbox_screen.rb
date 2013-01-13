@@ -10,6 +10,7 @@ class SandboxScreen
     Gdx.input.setInputProcessor @input_processor
 
     @entity_manager = EntityManager.new
+    @entity_builder  = EntityBuilder.new
 
     #
     # COMPONENTS: 
@@ -86,13 +87,15 @@ class SandboxScreen
       # [ ControlComponent, ->(c){c.boost}, "P2 boost?" ],
     ])
 
-    # Block
-    bouncer = @entity_manager.create_tagged_entity('the_block')
-    @entity_manager.add_component bouncer, MinecraftBlock.create(world: physics_component.world, x: 5)
-    @entity_manager.add_component bouncer, ControlComponent.create({
-      :left => [:press, Input::Keys::T],
-      :right => [:press, Input::Keys::Y],
-    })
+    # Minecraft Block
+    @entity_builder.create_minecraft_block @entity_manager, 
+      world: physics_component.world,
+      # sprite: [7,7],
+      sprite: :tnt,
+      controls: {
+        :left => [:press, Input::Keys::T],
+        :right => [:press, Input::Keys::Y],
+      }
 
 
 
@@ -122,6 +125,7 @@ class SandboxScreen
     debug_exception e
     @broke = true
   end
+
 
   def render(delta)
     render_start_time = Time.now
@@ -162,6 +166,7 @@ class SandboxScreen
   def self.source_dependencies
     %w{
       entity_manager
+      entity_builder
       my_input_processor
 
       physics_component
@@ -174,7 +179,7 @@ class SandboxScreen
       minecraft_block
       control_component
       control_system
-      renderable
+      body_renderable
       body_renderable_system
       main_rendering_system
 

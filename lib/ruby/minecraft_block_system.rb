@@ -10,7 +10,6 @@ class MinecraftBlockSystem
         minecraft_block.body.apply_force(300,100, 0.5,0.5)
       elsif control.left
         minecraft_block.body.apply_force(-300,100, 0.5,0.5)
-
       end
     end
   end
