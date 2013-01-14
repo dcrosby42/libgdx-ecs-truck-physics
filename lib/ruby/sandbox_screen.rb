@@ -27,6 +27,7 @@ class SandboxScreen
     level = @entity_manager.create_tagged_entity('level')
     @entity_manager.add_component level, physics_component
     @entity_manager.add_component level, GroundComponent.create(physics_component.world)
+    @entity_manager.add_component level, ExplodableComponent.create
     @entity_manager.add_component level, @input_processor 
     @entity_manager.add_component level, MainViewport.create(game_width: $game_width, game_height: $game_height, 
                                                              do_physics_debug_render: true,
@@ -125,6 +126,7 @@ class SandboxScreen
       MinecraftBlockSystem.new,
       BombSystem.new,
       ExplodableTruckSystem.new,
+      ExplodableStoneSystem.new,
       PhysicsSystem.new,
       MainViewportSystem.new,
       StatsSystem.new,
@@ -193,6 +195,7 @@ class SandboxScreen
       truck_system
       explodable_component
       explodable_truck_system
+      explodable_stone_system
       minecraft_block_system
       minecraft_block
       bomb_component
