@@ -4,8 +4,8 @@ class BombComponent
     bc = new
     bc.state = :off
     bc.timer = 0
-    bc.power = 100
-    bc.radius = 2.0
+    bc.power = opts[:power] || 100
+    bc.radius = opts[:radius] || 2.0
     bc
   end
 end

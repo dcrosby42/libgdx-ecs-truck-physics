@@ -27,16 +27,15 @@ class BombSystem
 
         minecraft_block = entity_manager.get_component_of_type(e, MinecraftBlock)
 
-        explosion = Explosion.new(
-          center: minecraft_block.body.position.cpy,
-          power: bomb.power,
-          radius: bomb.radius
-        )
 
         explodable_entities = entity_manager.get_all_entities_with_component_of_type(ExplodableComponent)
         explodable_entities.each do |ee|
           exp = entity_manager.get_component_of_type(ee, ExplodableComponent)
-          exp.explosion = explosion
+          exp.explosion = Explosion.new(
+            center: minecraft_block.body.position.cpy,
+            power: bomb.power,
+            radius: bomb.radius
+          )
         end
 
         # Kill the bomb object from entity and physics space:

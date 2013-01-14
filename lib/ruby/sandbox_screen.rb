@@ -103,7 +103,7 @@ class SandboxScreen
       },
       x: 13, y: 10
     @entity_manager.add_component tnt_mc_block, BombComponent.create(
-      radius: 1.0
+      radius: 7
     )
     @entity_manager.add_component tnt_mc_block, DebugComponent.create([
       [ BombComponent, ->(c){c.state}, "Bomb state" ],
