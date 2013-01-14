@@ -88,14 +88,25 @@ class SandboxScreen
     ])
 
     # Minecraft Block
-    @entity_builder.create_minecraft_block @entity_manager, 
+    tnt_mc_block = @entity_builder.create_minecraft_block @entity_manager, 
       world: physics_component.world,
       # sprite: [7,7],
       sprite: :tnt,
       controls: {
         :left => [:press, Input::Keys::T],
         :right => [:press, Input::Keys::Y],
+        :ignite => [:press, Input::Keys::I],
       }
+    @entity_manager.add_component tnt_mc_block, BombComponent.create
+    @entity_manager.add_component tnt_mc_block, DebugComponent.create([
+      [ BombComponent, ->(c){c.state}, "Bomb state" ],
+      [ BombComponent, ->(c){c.timer}, "Bomb timer" ],
+      # [ TruckComponent, ->(c){c.wheel1.angle}, "Wheel1 angle" ],
+      # [ ControlComponent, ->(c){c.left}, "P2 left?" ],
+      # [ ControlComponent, ->(c){c.right}, "P2 right?" ],
+      # [ ControlComponent, ->(c){c.jump}, "P2 jump?" ],
+      # [ ControlComponent, ->(c){c.boost}, "P2 boost?" ],
+    ])
 
 
 
@@ -109,6 +120,7 @@ class SandboxScreen
       ControlSystem.new,
       TruckSystem.new,
       MinecraftBlockSystem.new,
+      BombSystem.new,
       PhysicsSystem.new,
       MainViewportSystem.new,
       StatsSystem.new,
@@ -177,6 +189,8 @@ class SandboxScreen
       truck_system
       minecraft_block_system
       minecraft_block
+      bomb_component
+      bomb_system
       control_component
       control_system
       body_renderable

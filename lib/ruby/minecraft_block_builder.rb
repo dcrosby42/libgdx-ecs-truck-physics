@@ -59,6 +59,7 @@ class MinecraftBlockBuilder
     if controls
       entity_manager.add_component entity, ControlComponent.create(controls)
     end
+    entity
   end
 
 
