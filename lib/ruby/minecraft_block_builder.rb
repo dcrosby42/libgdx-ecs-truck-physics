@@ -19,10 +19,22 @@ class MinecraftBlockBuilder
     body = create_dynamic_body world, x: body_x, y: body_y
 
     fixture = create_polygon_fixture body, 
-      width: 1.0, height: 1.0, 
+      width: 2.0, height: 2.0, 
       friction: 0.3, 
       density: 0.5, 
       restitution: 0.1
+
+    # debug messing
+    # fixture = create_polygon_fixture body, 
+    #   points: vec2_array([
+    #     [0,0],
+    #     [2,0],
+    #     [2,2],
+    #     [0,2],
+    #   ]),
+    #   friction: 0.3, 
+    #   density: 0.5, 
+    #   restitution: 0.1
 
 
     tex = load_texture('minecraft_sheet.png')
@@ -53,12 +65,15 @@ class MinecraftBlockBuilder
     minecraft_block.body = body
     # mb.renderable = body_rend
 
+    $tnt = body
+
     entity = entity_manager.create_tagged_entity(tag)
     entity_manager.add_component entity, minecraft_block
     entity_manager.add_component entity, body_renderable
     if controls
       entity_manager.add_component entity, ControlComponent.create(controls)
     end
+
     entity
   end
 

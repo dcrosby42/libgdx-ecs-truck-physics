@@ -23,14 +23,20 @@ class BombSystem
         end
       when :splode
         puts "*!BOMB SPLODE!*"
-        puts Time.now.to_f
         bomb.state = :sploded
 
 
-        # Should I be bummed about coupling this code to MinecraftBlock and 
+        explodable_entities = entity_manager.get_all_entities_with_component_of_type(ExplodableComponent)
+        explodable_entities.each do |ee|
+          exp = entity_manager.get_component_of_type(ee, ExplodableComponent)
+          exp.exploded = true
+        end
+
+        # Kill the bomb object from entity and physics space:
+        # (Should I be bummed about coupling this code to MinecraftBlock and 
         # the idea that it has a phys body which needs to be removed?
         # The bomb system was coming together fairly generically... maybe it can be
-        # split into a starter/timer and reactor via a configured target...
+        # split into a starter/timer and reactor via a configured target...)
         minecraft_block = entity_manager.get_component_of_type(e, MinecraftBlock)
         level = entity_manager.get_all_entities_with_tag("level").first || raise("Can't find the 'level' entity!")
         physics_component = entity_manager.get_component_of_type(level, PhysicsComponent)

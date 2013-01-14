@@ -67,6 +67,7 @@ class SandboxScreen
     #   [ TruckComponent, ->(c){c.wheel2.angle}, "Wheel2 angle" ],
     #   [ TruckComponent, ->(c){c.wheel1.angle}, "Wheel1 angle" ],
     # ])
+    @entity_manager.add_component player1, ExplodableComponent.create
 
     # Player 2 Truck
     truck_component2 = TruckComponent.create(world: physics_component.world, x: 15)
@@ -86,6 +87,7 @@ class SandboxScreen
       # [ ControlComponent, ->(c){c.jump}, "P2 jump?" ],
       # [ ControlComponent, ->(c){c.boost}, "P2 boost?" ],
     ])
+    @entity_manager.add_component player2, ExplodableComponent.create
 
     # Minecraft Block
     tnt_mc_block = @entity_builder.create_minecraft_block @entity_manager, 
@@ -93,7 +95,8 @@ class SandboxScreen
       # sprite: [7,7],
       sprite: :tnt,
       controls: {
-        :left => [:press, Input::Keys::T],
+        :left => [:press, Input::Keys::R],
+        :down => [:press, Input::Keys::T],
         :right => [:press, Input::Keys::Y],
         :ignite => [:press, Input::Keys::I],
       }
@@ -121,6 +124,7 @@ class SandboxScreen
       TruckSystem.new,
       MinecraftBlockSystem.new,
       BombSystem.new,
+      ExplodableTruckSystem.new,
       PhysicsSystem.new,
       MainViewportSystem.new,
       StatsSystem.new,
@@ -154,7 +158,7 @@ class SandboxScreen
   
     @input_processor.clear
     render_end_time = Time.now
-    @stats_component.time_per_loop = render_end_time - render_start_time
+    @stats_component.time_per_loop = render_end_time.to_f - render_start_time.to_f
   rescue Exception => e
     debug_exception e
     @broke = true
@@ -187,6 +191,8 @@ class SandboxScreen
       hud_viewport
       truck_component
       truck_system
+      explodable_component
+      explodable_truck_system
       minecraft_block_system
       minecraft_block
       bomb_component
