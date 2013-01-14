@@ -25,11 +25,18 @@ class BombSystem
         puts "*!BOMB SPLODE!*"
         bomb.state = :sploded
 
+        minecraft_block = entity_manager.get_component_of_type(e, MinecraftBlock)
+
+        explosion = Explosion.new(
+          center: minecraft_block.body.position.cpy,
+          power: bomb.power,
+          radius: bomb.radius
+        )
 
         explodable_entities = entity_manager.get_all_entities_with_component_of_type(ExplodableComponent)
         explodable_entities.each do |ee|
           exp = entity_manager.get_component_of_type(ee, ExplodableComponent)
-          exp.exploded = true
+          exp.explosion = explosion
         end
 
         # Kill the bomb object from entity and physics space:
@@ -37,7 +44,6 @@ class BombSystem
         # the idea that it has a phys body which needs to be removed?
         # The bomb system was coming together fairly generically... maybe it can be
         # split into a starter/timer and reactor via a configured target...)
-        minecraft_block = entity_manager.get_component_of_type(e, MinecraftBlock)
         level = entity_manager.get_all_entities_with_tag("level").first || raise("Can't find the 'level' entity!")
         physics_component = entity_manager.get_component_of_type(level, PhysicsComponent)
 

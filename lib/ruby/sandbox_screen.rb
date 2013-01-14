@@ -100,8 +100,11 @@ class SandboxScreen
         :down => [:press, Input::Keys::T],
         :right => [:press, Input::Keys::Y],
         :ignite => [:press, Input::Keys::I],
-      }
-    @entity_manager.add_component tnt_mc_block, BombComponent.create
+      },
+      x: 13, y: 10
+    @entity_manager.add_component tnt_mc_block, BombComponent.create(
+      radius: 1.0
+    )
     @entity_manager.add_component tnt_mc_block, DebugComponent.create([
       [ BombComponent, ->(c){c.state}, "Bomb state" ],
       [ BombComponent, ->(c){c.timer}, "Bomb timer" ],
@@ -193,6 +196,7 @@ class SandboxScreen
       hud_viewport
       truck_component
       truck_system
+      explosion
       explodable_component
       explodable_truck_system
       explodable_stone_system

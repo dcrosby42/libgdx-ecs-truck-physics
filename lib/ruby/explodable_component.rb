@@ -1,5 +1,6 @@
 class ExplodableComponent
-  attr_accessor :exploded
+  attr_accessor :explosion
+
   def self.create
     new
   end
