@@ -14,6 +14,7 @@ class BombSystem
       when :ignite
         bomb.state = :ticking
         bomb.timer = 1
+        bomb.fuse_sound.play(1,0.7,0)
       when :ticking
         if bomb.timer > 0
           bomb.timer -= delta
@@ -22,6 +23,7 @@ class BombSystem
           bomb.state = :splode
         end
       when :splode
+        bomb.explode_sound.play(1,0.7,0)
         puts "*!BOMB SPLODE!*"
         bomb.state = :sploded
 

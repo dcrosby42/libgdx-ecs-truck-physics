@@ -8,11 +8,14 @@ class ExplodableTruckSystem
         truck_component = entity_manager.get_component_of_type(e, TruckComponent)
         pos = truck_component.truck_body.position
         if explosion.covers?(pos)
-          puts "#{entity_manager.get_tag(e)} truck SPLODED!"
           ray = pos.cpy.sub(explosion.center)
+          force = Vector2.new(0,1000).add(ray.cpy.mul(10 * explosion.power))
+          spin = 70
+          # puts "#{entity_manager.get_tag(e)} truck SPLODED! ray=#{ray} force=#{force} spin=#{spin}"
 
-          truck_component.truck_body.apply_force_to_center Vector2.new(0,1000).add(ray.mul(10 * explosion.power))
-          truck_component.truck_body.apply_angular_impulse 70
+
+          truck_component.truck_body.apply_force_to_center force
+          truck_component.truck_body.apply_angular_impulse spin
         else
           puts "#{entity_manager.get_tag(e)} truck missed by explosion!"
         end
