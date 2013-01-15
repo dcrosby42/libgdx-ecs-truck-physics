@@ -33,7 +33,7 @@ class BombSystem
         explodable_entities = entity_manager.get_all_entities_with_component_of_type(ExplodableComponent)
         explodable_entities.each do |ee|
           exp = entity_manager.get_component_of_type(ee, ExplodableComponent)
-          exp.explosion = Explosion.new(
+          exp.add Explosion.new(
             center: minecraft_block.body.position.cpy,
             power: bomb.power,
             radius: bomb.radius

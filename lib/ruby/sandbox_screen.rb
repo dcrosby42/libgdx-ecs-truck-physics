@@ -10,7 +10,6 @@ class SandboxScreen
     Gdx.input.setInputProcessor @input_processor
 
     @entity_manager = EntityManager.new
-    @entity_builder  = EntityBuilder.new
 
     #
     # COMPONENTS: 
@@ -34,11 +33,13 @@ class SandboxScreen
                                                              do_renderable_renders: true,
                                                              zoom_factor: 20,
                                                              follow_player: 'player1')
+    @entity_manager.add_component level, DemolitionComponent.create
     @entity_manager.add_component level, ControlComponent.create({
       :zoom_out   => [ :hold,  Input::Keys::MINUS ],
       :zoom_in    => [ :hold,  Input::Keys::EQUALS ],
       :pan_left   => [ :hold,  Input::Keys::NUM_9 ],
       :pan_right  => [ :hold,  Input::Keys::NUM_0 ],
+      :drop_tnt   => [ :press,  Input::Keys::P ],
       :toggle_draw_physics      => [ :press,  Input::Keys::F1 ],
       :toggle_draw_renderables  => [ :press,  Input::Keys::F2 ],
       :toggle_follow_player     => [ :press,  Input::Keys::F4 ],
@@ -90,32 +91,7 @@ class SandboxScreen
     ])
     @entity_manager.add_component player2, ExplodableComponent.create
 
-    # Minecraft Block
-    tnt_mc_block = @entity_builder.create_minecraft_block @entity_manager, 
-      world: physics_component.world,
-      # sprite: [7,7],
-      sprite: :tnt,
-      controls: {
-        :left => [:press, Input::Keys::R],
-        :down => [:press, Input::Keys::T],
-        :right => [:press, Input::Keys::Y],
-        :ignite => [:press, Input::Keys::I],
-      },
-      x: 13, y: 10
-    @entity_manager.add_component tnt_mc_block, BombComponent.create(
-      radius: 7
-    )
-    @entity_manager.add_component tnt_mc_block, DebugComponent.create([
-      [ BombComponent, ->(c){c.state}, "Bomb state" ],
-      [ BombComponent, ->(c){c.timer}, "Bomb timer" ],
-      # [ TruckComponent, ->(c){c.wheel1.angle}, "Wheel1 angle" ],
-      # [ ControlComponent, ->(c){c.left}, "P2 left?" ],
-      # [ ControlComponent, ->(c){c.right}, "P2 right?" ],
-      # [ ControlComponent, ->(c){c.jump}, "P2 jump?" ],
-      # [ ControlComponent, ->(c){c.boost}, "P2 boost?" ],
-    ])
-
-
+    @entity_manager.builder.create_tnt x: 13, y: 10, radius: 7
 
     #
     # SYSTEMS: 
@@ -136,6 +112,7 @@ class SandboxScreen
       DebugSystem.new,
       HudViewportSystem.new,
       BodyRenderableSystem.new,
+      DemolitionSystem.new,
       # Rendering:
       MainRenderingSystem.new,
       PhysicsDebugRenderingSystem.new,
@@ -215,6 +192,8 @@ class SandboxScreen
       physics_debug_rendering_system
       hud_rendering_system
       ground_component
+      demolition_component
+      demolition_system
 
       debug_component
       debug_system

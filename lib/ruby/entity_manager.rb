@@ -15,6 +15,7 @@
 class EntityManager
   attr_accessor :game
   attr_reader :id
+  attr_reader :builder
 
   def initialize
     @id          = java.util.UUID.randomUUID().to_s
@@ -24,6 +25,7 @@ class EntityManager
     # "Stores" hash: key=component class, value=a component store
     # Each "component store" hash: key=entity UUID, value=an array of components
     @component_stores = Hash.new
+    @builder = EntityBuilder.new(self)
   end
 
   def all_entities
