@@ -2,10 +2,7 @@
 class TruckSystem
 
   def tick(delta, entity_manager)
-    entities = entity_manager.get_all_entities_with_components_of_type([TruckComponent, ControlComponent])
-    entities.each do |e|
-      truck_component = entity_manager.get_component_of_type(e, TruckComponent)
-      control = entity_manager.get_component_of_type(e, ControlComponent)
+    entity_manager.each_entity_with_components_of_type([TruckComponent, ControlComponent]) do |e, truck_component, control|
 
       power = 0
       if control.left

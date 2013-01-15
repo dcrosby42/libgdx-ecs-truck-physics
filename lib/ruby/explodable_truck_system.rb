@@ -1,10 +1,7 @@
 class ExplodableTruckSystem
   def tick(delta,entity_manager)
-    entities = entity_manager.get_all_entities_with_components_of_type([TruckComponent, ExplodableComponent])
-    entities.each do |e|
-      exp_component = entity_manager.get_component_of_type(e, ExplodableComponent)
+    entity_manager.each_entity_with_components_of_type([TruckComponent, ExplodableComponent]) do |e, truck_component, exp_component|
       exp_component.explosions.each do |explosion|
-        truck_component = entity_manager.get_component_of_type(e, TruckComponent)
         pos = truck_component.truck_body.position
         if explosion.covers?(pos)
           ray = pos.cpy.sub(explosion.center)

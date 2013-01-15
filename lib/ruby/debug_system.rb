@@ -1,13 +1,11 @@
 class DebugSystem
   def tick(delta, entity_manager)
-    level = entity_manager.get_all_entities_with_tag("level").first || raise("Can't find the 'level' entity!")
+    level = entity_manager.get_entity_with_tag("level")
     input_processor = entity_manager.get_component_of_type(level, MyInputProcessor)
-    hv = entity_manager.get_component_of_type(level, HudViewport)
+    hv              = entity_manager.get_component_of_type(level, HudViewport)
     
     hv.debug_lines = []
-    entities = entity_manager.get_all_entities_with_component_of_type(DebugComponent)
-    entities.each do |e|
-      dc = entity_manager.get_component_of_type(e, DebugComponent)
+    entity_manager.each_entity_with_component_of_type(DebugComponent) do |e, dc|
       if input_processor.key_pressed?(Input::Keys::F3)
         dc.on = !dc.on
       end

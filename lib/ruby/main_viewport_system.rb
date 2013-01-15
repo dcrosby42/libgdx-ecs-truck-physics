@@ -1,7 +1,7 @@
 
 class MainViewportSystem
   def tick(delta, entity_manager)
-    level = entity_manager.get_all_entities_with_tag("level").first || raise("Can't find the 'level' entity!")
+    level = entity_manager.get_entity_with_tag("level")
     mv = entity_manager.get_component_of_type(level, MainViewport) || raise("No MainViewPort")
     control = entity_manager.get_component_of_type(level, ControlComponent) || raise("No ControlComponent")
 
@@ -38,7 +38,7 @@ class MainViewportSystem
 
     # Camera follows vehicle
     if mv.follow_player 
-      entity = entity_manager.get_all_entities_with_tag(mv.follow_player).first || raise("Couldn't find entity tagged '#{mv.follow_player}'")
+      entity = entity_manager.get_entity_with_tag(mv.follow_player)
       truck_component = entity_manager.get_component_of_type(entity, TruckComponent) || raise("Entity '#{mv.follow_player}' doesn't have a TruckComponent")
       body = truck_component.truck_body
 

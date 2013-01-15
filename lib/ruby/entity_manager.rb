@@ -250,4 +250,32 @@ class EntityManager
   def to_s
     "EntityManager {#{id}: #{all_entities.size} managed entities}"
   end
+
+
+  # Croz added
+  def each_entity_with_components_of_type(component_types, &block)
+    get_all_entities_with_components_of_type(component_types).each do |entity|
+      comps = component_types.map do |ctype| get_component_of_type(entity, ctype) end
+      block.call(entity, *comps)
+    end
+  end
+
+  # Croz added
+  def each_entity_with_component_of_type(component_type, &block)
+    get_all_entities_with_component_of_type(component_type).each do |entity|
+      comp = get_component_of_type(entity, component_type)
+      block.call(entity, comp)
+    end
+  end
+
+  # Croz added
+  def get_entity_with_tag(tag)
+    res = get_all_entities_with_tag(tag)
+    if res.nil? or res.empty?
+      raise "No entities found with tag '#{tag}'"
+    elsif res.length > 1
+      raise "Expected ONE entity with tag '#{tag}'; found #{res.length}"
+    end
+    res.first
+  end
 end

@@ -1,8 +1,6 @@
 class ExplodableStoneSystem
   def tick(delta,entity_manager)
-    entities = entity_manager.get_all_entities_with_components_of_type([GroundComponent, ExplodableComponent])
-    entities.each do |e|
-      exp_component = entity_manager.get_component_of_type(e, ExplodableComponent)
+    entity_manager.each_entity_with_components_of_type([GroundComponent, ExplodableComponent]) do |e,_,exp_component|
       exp_component.explosions.each do |explosion|
         puts "#{entity_manager.get_tag(e)} ground exploded!"
         ground_component = entity_manager.get_component_of_type(e, GroundComponent)

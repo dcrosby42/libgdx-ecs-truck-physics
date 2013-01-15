@@ -1,9 +1,6 @@
 class BombSystem
   def tick(delta, entity_manager)
-    entities = entity_manager.get_all_entities_with_components_of_type([BombComponent, ControlComponent])
-    entities.each do |e|
-      bomb = entity_manager.get_component_of_type(e, BombComponent)
-      control = entity_manager.get_component_of_type(e, ControlComponent)
+    entity_manager.each_entity_with_components_of_type([BombComponent, ControlComponent]) do |e,bomb,control|
 
       if control.ignite
         puts "ignite"
@@ -30,9 +27,7 @@ class BombSystem
         minecraft_block = entity_manager.get_component_of_type(e, MinecraftBlock)
 
 
-        explodable_entities = entity_manager.get_all_entities_with_component_of_type(ExplodableComponent)
-        explodable_entities.each do |ee|
-          exp = entity_manager.get_component_of_type(ee, ExplodableComponent)
+        entity_manager.each_entity_with_component_of_type(ExplodableComponent) do |ee, exp|
           exp.add Explosion.new(
             center: minecraft_block.body.position.cpy,
             power: bomb.power,
@@ -45,7 +40,7 @@ class BombSystem
         # the idea that it has a phys body which needs to be removed?
         # The bomb system was coming together fairly generically... maybe it can be
         # split into a starter/timer and reactor via a configured target...)
-        level = entity_manager.get_all_entities_with_tag("level").first || raise("Can't find the 'level' entity!")
+        level = entity_manager.get_entity_with_tag("level")
         physics_component = entity_manager.get_component_of_type(level, PhysicsComponent)
 
         physics_component.world.destroy_body minecraft_block.body

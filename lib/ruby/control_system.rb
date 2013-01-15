@@ -1,6 +1,6 @@
 class ControlSystem
   def tick(delta, entity_manager)
-    level = entity_manager.get_all_entities_with_tag("level").first || raise("Can't find the 'level' entity!")
+    level = entity_manager.get_entity_with_tag("level")
     input_processor = entity_manager.get_component_of_type(level, MyInputProcessor)
     
     entity_manager.get_all_components_of_type(ControlComponent).each do |control|

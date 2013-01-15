@@ -1,9 +1,7 @@
 
 class HudRenderingSystem
   def tick(delta, entity_manager)
-    entities = entity_manager.get_all_entities_with_component_of_type(HudViewport)
-    entities.each do |e|
-      hv = entity_manager.get_component_of_type(e, HudViewport)
+    entity_manager.each_entity_with_component_of_type(HudViewport) do |e,hv|
       hv.sprite_batch.setProjectionMatrix(hv.camera.combined)
       hv.sprite_batch.begin
       lines = [
@@ -20,12 +18,4 @@ class HudRenderingSystem
     end
   end
 end
-
-# truck_component.wheel1.angle
-# truck_component.wheel2.angle
-# "Player1 wheels: #{a1}, #{a2}"
-#
-# a = truck_component.wheel1.angle
-# 
-# "Player1 wheels: #{a1}, #{a2}"
 
