@@ -98,7 +98,7 @@ class SandboxScreen
     #
 
     # (ordering is significant)
-    @systems = [
+    @update_systems = [
       # Updating:
       ControlSystem.new,
       TruckSystem.new,
@@ -113,11 +113,19 @@ class SandboxScreen
       HudViewportSystem.new,
       BodyRenderableSystem.new,
       DemolitionSystem.new,
+    ]
+
+    @render_systems = [
       # Rendering:
       MainRenderingSystem.new,
       PhysicsDebugRenderingSystem.new,
       HudRenderingSystem.new,
     ]
+
+    @play_systems = @update_systems + @render_systems
+    @pause_systems = @render_systems + [PauseRenderingSystem.new]
+
+    @paused_by_user = false
 
   rescue Exception => e
     debug_exception e
@@ -130,17 +138,28 @@ class SandboxScreen
     # Level / reload control:
     reload_sandbox_screen if @input_processor.key_pressed?(Input::Keys::BACKSLASH)
     Gdx.app.exit if @input_processor.key_pressed?(Input::Keys::ESCAPE)
+    if @input_processor.key_pressed?(Input::Keys::SPACE)
+      @paused_by_user = !@paused_by_user
+    end
+    
     return if @broke
 
     Gdx.gl.glClear(GL10::GL_COLOR_BUFFER_BIT);  
 
-    @systems.each do |system|
-      system.tick delta, @entity_manager
+    if @paused_by_user
+      @pause_systems.each do |system|
+        system.tick delta, @entity_manager
+      end
+    else
+      @play_systems.each do |system|
+        system.tick delta, @entity_manager
+      end
     end
   
     @input_processor.clear
     render_end_time = Time.now
     @stats_component.time_per_loop = render_end_time.to_f - render_start_time.to_f
+
   rescue Exception => e
     debug_exception e
     @broke = true
@@ -191,6 +210,7 @@ class SandboxScreen
       hud_viewport_system
       physics_debug_rendering_system
       hud_rendering_system
+      pause_rendering_system
       ground_component
       demolition_component
       demolition_system
