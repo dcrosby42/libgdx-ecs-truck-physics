@@ -7,7 +7,7 @@ class Explosion
   end
 
   def covers?(vec)
-    puts "Center #{center.x},#{center.y} radius=#{radius} target #{vec.x},#{vec.y}: distance: #{center.dst(vec)}"
+    # puts "Center #{center.x},#{center.y} radius=#{radius} target #{vec.x},#{vec.y}: distance: #{center.dst(vec)}"
     center.dst(vec) <= radius
   end
 end
