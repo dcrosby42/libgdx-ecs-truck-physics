@@ -2,6 +2,12 @@
 class SandboxScreen
   include Screen
 
+  def initialize(opts={})
+    @app_shell = opts[:app_shell]
+    @game_width = opts[:game_width]
+    @game_height = opts[:game_height]
+  end
+
   def show
     return if @broke
 
@@ -28,7 +34,7 @@ class SandboxScreen
     @entity_manager.add_component level, GroundComponent.create(physics_component.world)
     @entity_manager.add_component level, ExplodableComponent.create
     @entity_manager.add_component level, @input_processor 
-    @entity_manager.add_component level, MainViewport.create(game_width: $game_width, game_height: $game_height, 
+    @entity_manager.add_component level, MainViewport.create(game_width: @game_width, game_height: @game_height, 
                                                              do_physics_debug_render: true,
                                                              do_renderable_renders: true,
                                                              zoom_factor: 20,
@@ -44,7 +50,7 @@ class SandboxScreen
       :toggle_draw_renderables  => [ :press,  Input::Keys::F2 ],
       :toggle_follow_player     => [ :press,  Input::Keys::F4 ],
     })
-    hud_viewport = HudViewport.create(game_width: $game_width, game_height: $game_height)
+    hud_viewport = HudViewport.create(game_width: @game_width, game_height: @game_height)
     @entity_manager.add_component level, hud_viewport
     @entity_manager.add_component level, @stats_component
     @entity_manager.add_component level, DebugComponent.create([
@@ -136,7 +142,7 @@ class SandboxScreen
   def render(delta)
     render_start_time = Time.now
     # Level / reload control:
-    reload_sandbox_screen if @input_processor.key_pressed?(Input::Keys::BACKSLASH)
+    @app_shell.reload_game_screen if @input_processor.key_pressed?(Input::Keys::BACKSLASH)
     Gdx.app.exit if @input_processor.key_pressed?(Input::Keys::ESCAPE)
     if @input_processor.key_pressed?(Input::Keys::SPACE)
       @paused_by_user = !@paused_by_user
@@ -169,6 +175,7 @@ class SandboxScreen
   end
 
   def resize(w,h)
+    puts "Resized to #{w}x#{h}"
   end
 
   def pause

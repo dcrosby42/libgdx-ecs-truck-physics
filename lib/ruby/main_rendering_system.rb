@@ -25,7 +25,7 @@ class MainRenderingSystem
     sr.begin(ShapeRenderer::ShapeType::FilledRectangle)
       sr.setProjectionMatrix(hud_viewport.camera.combined)
       # sr.setColor(0.3, 0.3, 0.4, 1);
-      sr.filledRect(0,0, $game_width, $game_height, 
+      sr.filledRect(0,0, main_viewport.game_width, main_viewport.game_height, 
                    BOTTOM_SKY_COLOR, BOTTOM_SKY_COLOR, TOP_SKY_COLOR, TOP_SKY_COLOR)
     sr.end
 

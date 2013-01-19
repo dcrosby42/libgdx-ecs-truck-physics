@@ -1,4 +1,4 @@
-class TitleScreen
+class BlankScreen
   include Screen
 
   def initialize(opts={})
