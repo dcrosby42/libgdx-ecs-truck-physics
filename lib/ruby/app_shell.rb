@@ -2,7 +2,12 @@ require 'my_game'
 require 'file_watcher'
 
 class AppShell
+  attr_reader :game_width, :game_height
+
   def launch_game
+    @context = Conject.create_object_context(nil)
+    @context[:app_shell] = self
+
     @game_width = 800
     @game_height = 600
 
@@ -18,20 +23,23 @@ class AppShell
       reload_game_screen
     end
     @watcher.start
+    @context[:file_watcher] = @watcher
 
     @game = MyGame.new
+    @context[:my_game] = @game#MyGame.new
     @app = LwjglApplication.new(@game, @config)
+    @context[:app] = @app
 
-
-    @screen_opts = {
-      app_shell: self,
-      game_width: @game_width,
-      game_height: @game_height,
-    }
+    # @screen_opts = {
+    #   app_shell: self,
+    #   game_width: @game_width,
+    #   game_height: @game_height,
+    # }
 
     @target_screen_source_name = "sandbox_screen"
     require @target_screen_source_name
     @target_screen_class = SandboxScreen
+    @context.configure_objects @target_screen_source_name => { cache: false }
 
     reload_game_screen
   end
@@ -47,7 +55,8 @@ class AppShell
         EntityBuilder.source_dependencies.each do |dep|
           load_source(dep)
         end
-        @screen = @target_screen_class.new(@screen_opts)
+        @screen = #@target_screen_class.new(@screen_opts)
+        @screen = @context[@target_screen_source_name]
         @game.set_screen @screen
       rescue Exception => e
         debug_exception e
@@ -71,20 +80,5 @@ class AppShell
     end
   end
 
-
-  def load_sound(snd_name)
-    @sound_cache ||= {}
-    file = RELATIVE_ROOT + 'res/sounds/' + snd_name
-    return @sound_cache[file] if @sound_cache[file]
-    handle = Gdx.files.internal(file)
-    begin
-      sound = @app.audio.new_sound(handle)
-      @sound_cache[file] = sound
-      return sound
-    rescue Exception => e
-      puts "!! FAIL to load sound using Gdx.files.internal(#{file.inspect}): #{e.message}\n\t#{e.backtrace.join("\n\t")}"
-      raise "Aborting due to sound loading difficulties with #{file}"
-    end
-  end
 
 end

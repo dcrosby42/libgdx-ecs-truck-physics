@@ -14,9 +14,9 @@ def load_texture(img_name)
 end
 
 
-def load_sound(snd_name)
-  $app_shell.load_sound(snd_name)
-end
+# def load_sound(snd_name)
+#   $app_shell.load_sound(snd_name)
+# end
 
 
 def debug_exception(e)
@@ -31,7 +31,7 @@ end
 app_shell = AppShell.new
 app_shell.launch_game
 
-$app_shell = app_shell
+# $app_shell = app_shell
 
 
 require 'pry'

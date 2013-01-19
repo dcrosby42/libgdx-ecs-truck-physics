@@ -53,3 +53,4 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 
 require 'metaid'
 require 'math_utils'
+require 'conject'

@@ -2,10 +2,14 @@
 class SandboxScreen
   include Screen
 
-  def initialize(opts={})
-    @app_shell = opts[:app_shell]
-    @game_width = opts[:game_width]
-    @game_height = opts[:game_height]
+  construct_with :app_shell, :entity_manager, :entity_builder
+
+  def initialize
+    # @app_shell = opts[:app_shell]
+    # @game_width = opts[:game_width]
+    # @game_height = opts[:game_height]
+    @game_width = app_shell.game_width
+    @game_height = app_shell.game_height
   end
 
   def show
@@ -14,8 +18,6 @@ class SandboxScreen
     # @input_processor = DebugInputProcessor.new
     @input_processor = MyInputProcessor.new
     Gdx.input.setInputProcessor @input_processor
-
-    @entity_manager = EntityManager.new
 
     #
     # COMPONENTS: 
@@ -29,18 +31,18 @@ class SandboxScreen
     @stats_component.expected_framerate = 60
     
     # The "Level": 
-    level = @entity_manager.create_tagged_entity('level')
-    @entity_manager.add_component level, physics_component
-    @entity_manager.add_component level, GroundComponent.create(physics_component.world)
-    @entity_manager.add_component level, ExplodableComponent.create
-    @entity_manager.add_component level, @input_processor 
-    @entity_manager.add_component level, MainViewport.create(game_width: @game_width, game_height: @game_height, 
+    level = entity_manager.create_tagged_entity('level')
+    entity_manager.add_component level, physics_component
+    entity_manager.add_component level, GroundComponent.create(physics_component.world)
+    entity_manager.add_component level, ExplodableComponent.create
+    entity_manager.add_component level, @input_processor 
+    entity_manager.add_component level, MainViewport.create(game_width: @game_width, game_height: @game_height, 
                                                              do_physics_debug_render: true,
                                                              do_renderable_renders: true,
                                                              zoom_factor: 20,
                                                              follow_player: 'player1')
-    @entity_manager.add_component level, DemolitionComponent.create
-    @entity_manager.add_component level, ControlComponent.create({
+    entity_manager.add_component level, DemolitionComponent.create
+    entity_manager.add_component level, ControlComponent.create({
       :zoom_out   => [ :hold,  Input::Keys::MINUS ],
       :zoom_in    => [ :hold,  Input::Keys::EQUALS ],
       :pan_left   => [ :hold,  Input::Keys::NUM_9 ],
@@ -51,9 +53,9 @@ class SandboxScreen
       :toggle_follow_player     => [ :press,  Input::Keys::F4 ],
     })
     hud_viewport = HudViewport.create(game_width: @game_width, game_height: @game_height)
-    @entity_manager.add_component level, hud_viewport
-    @entity_manager.add_component level, @stats_component
-    @entity_manager.add_component level, DebugComponent.create([
+    entity_manager.add_component level, hud_viewport
+    entity_manager.add_component level, @stats_component
+    entity_manager.add_component level, DebugComponent.create([
       [ StatsComponent, ->(c){c.fps}, "FPS" ],
       # [ StatsComponent, ->(c){c.time_per_loop}, "Time-per-loop" ],
       [ StatsComponent, ->(c){c.utilization}, "Render load" ],
@@ -63,31 +65,31 @@ class SandboxScreen
 
     # Player 1 Truck
     truck_component = TruckComponent.create(world: physics_component.world)
-    player1 = @entity_manager.create_tagged_entity('player1')
-    @entity_manager.add_component player1, truck_component
-    @entity_manager.add_component player1, ControlComponent.create({
+    player1 = entity_manager.create_tagged_entity('player1')
+    entity_manager.add_component player1, truck_component
+    entity_manager.add_component player1, ControlComponent.create({
       :left  => [ :hold,  Input::Keys::A ],
       :right => [ :hold,  Input::Keys::D ], 
       :jump  => [ :press, Input::Keys::W ], 
       :boost => [ :hold,  Input::Keys::CONTROL_LEFT ],
     })
-    # @entity_manager.add_component player1, DebugComponent.create([
+    # entity_manager.add_component player1, DebugComponent.create([
     #   [ TruckComponent, ->(c){c.wheel2.angle}, "Wheel2 angle" ],
     #   [ TruckComponent, ->(c){c.wheel1.angle}, "Wheel1 angle" ],
     # ])
-    @entity_manager.add_component player1, ExplodableComponent.create
+    entity_manager.add_component player1, ExplodableComponent.create
 
     # Player 2 Truck
     truck_component2 = TruckComponent.create(world: physics_component.world, x: 15)
-    player2 = @entity_manager.create_tagged_entity('player2')
-    @entity_manager.add_component player2, truck_component2
-    @entity_manager.add_component player2, ControlComponent.create({
+    player2 = entity_manager.create_tagged_entity('player2')
+    entity_manager.add_component player2, truck_component2
+    entity_manager.add_component player2, ControlComponent.create({
       :left  => [ :hold,  Input::Keys::LEFT ],
       :right => [ :hold,  Input::Keys::RIGHT ], 
       :jump  => [ :press, Input::Keys::UP ], 
       :boost => [ :hold,  Input::Keys::SHIFT_RIGHT ],
     })
-    @entity_manager.add_component player2, DebugComponent.create([
+    entity_manager.add_component player2, DebugComponent.create([
       # [ TruckComponent, ->(c){c.wheel2.angle}, "Wheel2 angle" ],
       # [ TruckComponent, ->(c){c.wheel1.angle}, "Wheel1 angle" ],
       # [ ControlComponent, ->(c){c.left}, "P2 left?" ],
@@ -95,9 +97,9 @@ class SandboxScreen
       # [ ControlComponent, ->(c){c.jump}, "P2 jump?" ],
       # [ ControlComponent, ->(c){c.boost}, "P2 boost?" ],
     ])
-    @entity_manager.add_component player2, ExplodableComponent.create
+    entity_manager.add_component player2, ExplodableComponent.create
 
-    @entity_manager.builder.create_tnt x: 13, y: 10, radius: 7
+    entity_builder.create_tnt x: 13, y: 10, radius: 7
 
     #
     # SYSTEMS: 
@@ -142,7 +144,7 @@ class SandboxScreen
   def render(delta)
     render_start_time = Time.now
     # Level / reload control:
-    @app_shell.reload_game_screen if @input_processor.key_pressed?(Input::Keys::BACKSLASH)
+    app_shell.reload_game_screen if @input_processor.key_pressed?(Input::Keys::BACKSLASH)
     Gdx.app.exit if @input_processor.key_pressed?(Input::Keys::ESCAPE)
     if @input_processor.key_pressed?(Input::Keys::SPACE)
       @paused_by_user = !@paused_by_user
@@ -154,11 +156,11 @@ class SandboxScreen
 
     if @paused_by_user
       @pause_systems.each do |system|
-        system.tick delta, @entity_manager
+        system.tick delta, entity_manager
       end
     else
       @play_systems.each do |system|
-        system.tick delta, @entity_manager
+        system.tick delta, entity_manager
       end
     end
   
@@ -192,6 +194,7 @@ class SandboxScreen
       entity_manager
       entity_builder
       my_input_processor
+      sound_loader
 
       physics_component
       physics_system
