@@ -2,9 +2,9 @@ require 'my_game'
 require 'file_watcher'
 
 class AppShell
-  attr_reader :game_width, :game_height
+  attr_reader :game_width, :game_height, :context
 
-  def launch_game
+  def launch_game!
     @context = Conject.create_object_context(nil)
     @context[:app_shell] = self
 
@@ -22,11 +22,10 @@ class AppShell
       puts "Change detected to #{fname} @ #{mtime}"
       reload_game_screen
     end
-    @watcher.start
     @context[:file_watcher] = @watcher
 
     @game = MyGame.new
-    @context[:my_game] = @game#MyGame.new
+    @context[:game] = @game#MyGame.new
     @app = LwjglApplication.new(@game, @config)
     @context[:app] = @app
 
@@ -39,9 +38,16 @@ class AppShell
     @target_screen_source_name = "sandbox_screen"
     require @target_screen_source_name
     @target_screen_class = SandboxScreen
-    @context.configure_objects @target_screen_source_name => { cache: false }
+    #@context.configure_objects @target_screen_source_name => { cache: false }
 
     reload_game_screen
+
+    @watcher.start
+  end
+
+  def prompt
+    require 'pry'
+    binding.pry
   end
 
   def reload_game_screen
@@ -55,8 +61,10 @@ class AppShell
         EntityBuilder.source_dependencies.each do |dep|
           load_source(dep)
         end
-        @screen = #@target_screen_class.new(@screen_opts)
-        @screen = @context[@target_screen_source_name]
+        
+        @context.in_subcontext do |sub| 
+          @screen = sub[@target_screen_source_name]
+        end
         @game.set_screen @screen
       rescue Exception => e
         debug_exception e

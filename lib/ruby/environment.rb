@@ -54,3 +54,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 require 'metaid'
 require 'math_utils'
 require 'conject'
+
+def debug_exception(e)
+  puts "EXCEPTION: #{e.message}\n\t#{e.backtrace.join("\n\t")}"
+end
+
