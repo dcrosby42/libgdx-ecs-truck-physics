@@ -33,7 +33,7 @@ class SandboxScreen
     # The "Level": 
     level = entity_manager.create_tagged_entity('level')
     entity_manager.add_component level, physics_component
-    entity_manager.add_component level, GroundComponent.create(physics_component.world)
+    entity_manager.add_component level, GroundComponent.create(object_context, physics_component.world)
     entity_manager.add_component level, ExplodableComponent.create
     entity_manager.add_component level, @input_processor 
     entity_manager.add_component level, MainViewport.create(game_width: @game_width, game_height: @game_height, 
@@ -64,7 +64,7 @@ class SandboxScreen
     ])
 
     # Player 1 Truck
-    truck_component = TruckComponent.create(world: physics_component.world)
+    truck_component = TruckComponent.create(object_context, world: physics_component.world)
     player1 = entity_manager.create_tagged_entity('player1')
     entity_manager.add_component player1, truck_component
     entity_manager.add_component player1, ControlComponent.create({
@@ -80,7 +80,7 @@ class SandboxScreen
     entity_manager.add_component player1, ExplodableComponent.create
 
     # Player 2 Truck
-    truck_component2 = TruckComponent.create(world: physics_component.world, x: 15)
+    truck_component2 = TruckComponent.create(object_context, world: physics_component.world, x: 15)
     player2 = entity_manager.create_tagged_entity('player2')
     entity_manager.add_component player2, truck_component2
     entity_manager.add_component player2, ControlComponent.create({
@@ -195,6 +195,7 @@ class SandboxScreen
       entity_builder
       my_input_processor
       sound_loader
+      texture_loader
 
       physics_component
       physics_system

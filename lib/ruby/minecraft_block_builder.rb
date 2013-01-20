@@ -1,7 +1,9 @@
 class MinecraftBlockBuilder
   include PhysicsBuilder
 
-  def build(entity_manager, opts={})
+  construct_with :entity_manager, :texture_loader
+
+  def build(opts={})
     world = opts[:world] || raise("Need :world to build MinecraftBlock")
     tag = opts[:tag] || "minecraft_block"
     controls = opts[:controls] 
@@ -37,7 +39,7 @@ class MinecraftBlockBuilder
     #   restitution: 0.1
 
 
-    tex = load_texture('minecraft_sheet.png')
+    tex = texture_loader.load_texture('minecraft_sheet.png')
     row = 2
     col = 11
     case opts[:sprite]

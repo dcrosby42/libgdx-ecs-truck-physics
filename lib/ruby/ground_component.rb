@@ -2,7 +2,8 @@ class GroundComponent
   extend MathUtils
   attr_accessor :ground, :stones, :rend_body_pairs, :ground_contour_points
 
-  def self.create(world)
+  def self.create(object_context, world)
+    texture_loader = object_context[:texture_loader]
 
     # Ground + hill
 
@@ -88,7 +89,7 @@ class GroundComponent
     # STONES: 
     
     # stone1 = Texture.new(Gdx.files.internal(RELATIVE_ROOT + 'images/stone1.png'))
-    stone1 = load_texture("stone1.png")
+    stone1 = texture_loader.load_texture("stone1.png")
 
     circle_def = FixtureDef.new
     circle_def.shape = CircleShape.new

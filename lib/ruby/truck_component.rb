@@ -3,7 +3,9 @@ class TruckComponent
   extend MathUtils
   attr_accessor :truck_body, :wheel1, :wheel2, :motor1, :motor2, :truck_body_rend, :wheel1_rend, :wheel2_rend
 
-  def self.create(opts={})
+  def self.create(object_context, opts={})
+    texture_loader = object_context[:texture_loader]
+
     world = opts[:world] || raise("Supply :world")
     truck_body_x = opts[:x] || 10
     truck_body_y = opts[:y] || 6
@@ -88,11 +90,11 @@ class TruckComponent
 
     # RENDERABLES
     # chassis = Texture.new(Gdx.files.internal(RELATIVE_ROOT + 'images/truck_chassis.png'))
-    chassis = load_texture('truck_chassis.png')
+    chassis = texture_loader.load_texture('truck_chassis.png')
     truck_body_rend = BodyRenderable.create(texture: chassis, texture_scale: 0.022, offset_x: -0.15, offset_y: 0.75)
 
     # tire = Texture.new(Gdx.files.internal(RELATIVE_ROOT + 'images/truck_tire.png'))
-    tire = load_texture('truck_tire.png')
+    tire = texture_loader.load_texture('truck_tire.png')
     wheel1_rend = BodyRenderable.create(texture: tire, texture_scale: 0.022)
     wheel2_rend = BodyRenderable.create(texture: tire, texture_scale: 0.022)
 

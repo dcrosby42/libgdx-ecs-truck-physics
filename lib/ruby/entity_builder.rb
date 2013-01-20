@@ -1,5 +1,6 @@
 class EntityBuilder
-  construct_with :entity_manager
+  construct_with :entity_manager, 
+    :minecraft_block_builder
 
   def initialize
     # TODO : YIKES This sux
@@ -7,7 +8,7 @@ class EntityBuilder
   end
 
   def create_minecraft_block(opts={})
-    MinecraftBlockBuilder.new.build entity_manager, opts
+    minecraft_block_builder.build opts
   end
 
   def create_tnt(opts={})
