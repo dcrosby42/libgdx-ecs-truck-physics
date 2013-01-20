@@ -2,7 +2,7 @@ GEM
   remote: http://rubygems.org/
   specs:
     coderay (1.0.8)
-    conject (0.1.2)
+    conject (0.1.4)
     jruby-jars (1.7.2)
     jruby-rack (1.1.12)
     method_source (0.8.1)

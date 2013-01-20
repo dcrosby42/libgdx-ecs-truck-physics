@@ -1,5 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + "/../lib/ruby/environment") 
-
+require 'pry'
 require 'app_shell'
 
 def load_texture(img_name)
@@ -34,7 +34,8 @@ app_shell.launch_game
 # $app_shell = app_shell
 
 
-require 'pry'
-binding.pry
+# require 'pry'
+# binding.pry
+puts "THE END"
 
 

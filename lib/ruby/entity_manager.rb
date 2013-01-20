@@ -16,6 +16,10 @@ class EntityManager
   attr_accessor :game
   attr_reader :id
 
+  #XXX this is a crappy temporary measure; EntityBuilder will set this reference to himself when he is constructed,
+  # So certain Systems can have access to entity construction
+  attr_accessor :entity_builder 
+  
   def initialize
     @id          = java.util.UUID.randomUUID().to_s
     @ids_to_tags = Hash.new

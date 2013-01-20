@@ -1,6 +1,11 @@
 class EntityBuilder
   construct_with :entity_manager
 
+  def initialize
+    # TODO : YIKES This sux
+    entity_manager.entity_builder = self
+  end
+
   def create_minecraft_block(opts={})
     MinecraftBlockBuilder.new.build entity_manager, opts
   end
