@@ -4,7 +4,9 @@ require 'file_watcher'
 class AppShell
   attr_reader :game_width, :game_height, :context
 
-  def launch_game!
+  def launch_game!(opts={})
+    @reloadable = opts[:reloadable] == true
+
     @context = Conject.create_object_context(nil)
     @context[:app_shell] = self
 
@@ -17,12 +19,14 @@ class AppShell
     @config.width = @game_width
     @config.height = @game_height
 
-    @watcher = FileWatcher.new
-    @watcher.on_file_changed do |fname,mtime|
-      puts "Change detected to #{fname} @ #{mtime}"
-      reload_game_screen
+    if @reloadable 
+      @watcher = FileWatcher.new
+      @watcher.on_file_changed do |fname,mtime|
+        puts "Change detected to #{fname} @ #{mtime}"
+        reload_game_screen
+      end
+      @context[:file_watcher] = @watcher
     end
-    @context[:file_watcher] = @watcher
 
     @game = MyGame.new
     @context[:game] = @game#MyGame.new
@@ -42,7 +46,7 @@ class AppShell
 
     reload_game_screen
 
-    @watcher.start
+    @watcher.start if @reloadable
   end
 
   def prompt
@@ -74,9 +78,13 @@ class AppShell
   end
 
   def load_source(name)
-    fname = lookup_source(name)
-    @watcher.watch_for_mods fname
-    load fname
+    if @reloadable
+      fname = lookup_source(name)
+      @watcher.watch_for_mods fname
+      load fname
+    else
+      require name
+    end
   end
 
   def lookup_source(name)

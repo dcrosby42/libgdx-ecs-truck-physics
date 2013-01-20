@@ -21,7 +21,7 @@ class EntityBuilder
     physics_component = entity_manager.get_component_of_type(level, PhysicsComponent)
 
     tnt = create_minecraft_block world: physics_component.world,
-      sprite: :tnt,
+      sprite: :cobblestone,
       controls: {
         :left => [:press, Input::Keys::R],
         :down => [:press, Input::Keys::T],
